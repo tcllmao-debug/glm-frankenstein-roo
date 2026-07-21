@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SSB — CHEAT ENGINE (kernel-level, flashing)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#020407; --fg:#d5f7ff; --acc:#42f8ff; --warn:#ffd447; --ok:#59ffa3; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  header { padding:12px 16px; border-bottom:1px solid #123; display:flex; gap:12px; align-items:center; }
+  h1 { font-size:15px; margin:0; color:var(--acc); letter-spacing:1px; }
+  main { display:grid; grid-template-columns: 1fr 1fr; gap:12px; padding:12px 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  section { border:1px solid #123; border-radius:8px; background:#04070c; padding:12px; }
+  h2 { font-size:12px; color:var(--warn); margin:0 0 8px; letter-spacing:1px; }
+  pre, #editor { background:#000; border:1px solid #123; border-radius:6px; padding:8px; font-size:11px; overflow:auto; max-height:44vh; white-space:pre; }
+  #editor { white-space:pre; width:100%; height:36vh; resize:none; color:var(--fg); font-family:inherit; }
+  input { background:#000; color:var(--fg); border:1px solid #234; border-radius:6px; padding:8px; font:inherit; }
+  button { background:#0a1a22; color:var(--acc); border:1px solid var(--acc); border-radius:6px; padding:7px 12px; font:inherit; cursor:pointer; }
+  table { border-collapse:collapse; width:100%; font-size:11px; }
+  td, th { border-bottom:1px solid #123; padding:3px 6px; text-align:left; }
+  .row { display:flex; gap:8px; margin:6px 0; }
+  a { color:var(--acc); }
+</style>
+</head>
+<body>
+<header>
+  <h1>CHEAT ENGINE — down to kernel level</h1>
+  <a href="/" style="font-size:12px">← hub</a>
+  <span style="color:#6c8a96;font-size:11px">maps · raw mem reads · flashing watches · live node edit · raw code edit</span>
+</header>
+<main>
+  <section>
+    <h2>PROCESS → MEMORY MAPS</h2>
+    <div class="row"><input id="pid" placeholder="pid"><button id="maps">load maps</button><button id="plist">processes</button></div>
+    <pre id="mapview"></pre>
+  </section>
+  <section>
+    <h2>RAW MEMORY WATCH (flashes on change)</h2>
+    <div class="row"><input id="maddr" placeholder="addr hex e.g. 0x7f..."><input id="mlen" value="128" style="max-width:80px"><button id="watch">watch</button></div>
+    <table><tr><th>pid</th><th>addr</th><th>value (hex)</th></tr><tbody id="watches"></tbody></table>
+  </section>
+  <section>
+    <h2>LIVE NODE EDIT (brain graph)</h2>
+    <div class="row"><input id="nid" placeholder="node id"><input id="nlabel" placeholder="new label"><input id="nkind" placeholder="kind"></div>
+    <div class="row"><button id="editnode">apply edit</button></div>
+    <pre id="nodeout"></pre>
+  </section>
+  <section>
+    <h2>RAW CODE EDITOR (edit anything, save anywhere)</h2>
+    <div class="row"><input id="epath" value="/tmp/note.txt"><button id="eload">load</button><button id="esave">save</button></div>
+    <textarea id="editor" spellcheck="false"></textarea>
+    <pre id="eout"></pre>
+  </section>
+</main>
+<script src="/kit.js"></script>
+<script>
+"use strict";
+async function j(u, o) { return (await fetch(u, o)).json(); }
+document.getElementById('plist').onclick = async () => {
+  const d = await j('/beast/api/os/ps');
+  document.getElementById('mapview').textContent = d.processes.slice(0,40).map(p => `${p.pid}\t${p.rss_mb}MB\t${p.name}\t${(p.cmdline||'').slice(0,60)}`).join('\n');
+};
+document.getElementById('maps').onclick = async () => {
+  const d = await j('/beast/api/cheat/maps?pid=' + encodeURIComponent(document.getElementById('pid').value));
+  document.getElementById('mapview').textContent = d.maps || d.error;
+};
+const watchRows = {};
+document.getElementById('watch').onclick = () => {
+  const pid = document.getElementById('pid').value, addr = document.getElementById('maddr').value, len = document.getElementById('mlen').value;
+  if (!pid || !addr) return;
+  const key = pid + ':' + addr;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${pid}</td><td>${addr}</td><td class="val">…</td>`;
+  document.getElementById('watches').appendChild(tr);
+  watchRows[key] = {tr, last: null};
+  setInterval(async () => {
+    const d = await j(`/beast/api/cheat/mem?pid=${pid}&addr=${encodeURIComponent(addr)}&len=${len}`);
+    const cell = tr.querySelector('.val');
+    const v = d.ok ? d.hex : ('ERR: ' + (d.error||'').slice(0,60));
+    if (watchRows[key].last !== null && v !== watchRows[key].last) SSBKIT.flash(cell, 'ssb-flash-red');
+    else if (watchRows[key].last === null) SSBKIT.flash(cell);
+    cell.textContent = v; watchRows[key].last = v;
+  }, 1500);
+};
+document.getElementById('editnode').onclick = async () => {
+  const d = await j('/portal/api/node/edit', {method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({id: document.getElementById('nid').value, label: document.getElementById('nlabel').value, kind: document.getElementById('nkind').value})});
+  document.getElementById('nodeout').textContent = JSON.stringify(d, null, 2);
+};
+document.getElementById('eload').onclick = async () => {
+  const d = await j('/beast/api/os/read?path=' + encodeURIComponent(document.getElementById('epath').value));
+  document.getElementById('editor').value = d.text || d.error || '';
+};
+document.getElementById('esave').onclick = async () => {
+  const d = await j('/beast/api/os/write?path=' + encodeURIComponent(document.getElementById('epath').value) + '&content=' + encodeURIComponent(document.getElementById('editor').value));
+  document.getElementById('eout').textContent = JSON.stringify(d);
+};
+</script>
+</body>
+</html>

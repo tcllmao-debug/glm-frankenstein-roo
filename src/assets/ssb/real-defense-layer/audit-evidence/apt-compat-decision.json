@@ -1,0 +1,187 @@
+{
+  "action": "quarantine_escalate",
+  "severity_score": 0.723,
+  "chain_matrix": {
+    "vault": {
+      "name": "vault",
+      "score": 1.0,
+      "confidence": 0.9,
+      "weight": 0.18,
+      "weighted": 0.18,
+      "reasoning": [
+        "vault matched primitive 'shell.subprocess_shell' (severity=critical, confidence=0.85) \u2192 contribution 0.850",
+        "vault matched primitive 'subprocess.shell_true' (severity=critical, confidence=1.00) \u2192 contribution 1.000"
+      ],
+      "triggered_primitives": [
+        "shell.subprocess_shell",
+        "ssrf.url",
+        "subprocess.shell_true",
+        "structure.delayed_payload"
+      ]
+    },
+    "mirror": {
+      "name": "mirror",
+      "score": 0.6375,
+      "confidence": 0.8,
+      "weight": 0.16,
+      "weighted": 0.102,
+      "reasoning": [
+        "mirror saw 'structure.delayed_payload' at source \u2192 +0.85"
+      ],
+      "triggered_primitives": [
+        "structure.delayed_payload"
+      ]
+    },
+    "null": {
+      "name": "null",
+      "score": 0.0,
+      "confidence": 0.6,
+      "weight": 0.12,
+      "weighted": 0.0,
+      "reasoning": [
+        "no weak-fit signals surfaced"
+      ],
+      "triggered_primitives": []
+    },
+    "flame": {
+      "name": "flame",
+      "score": 0.85,
+      "confidence": 0.85,
+      "weight": 0.18,
+      "weighted": 0.153,
+      "reasoning": [
+        "flame: 3 layers agree, 2 critical + 2 high findings \u2014 synthesizing exploit chain"
+      ],
+      "triggered_primitives": [
+        "cross_layer_corroboration"
+      ]
+    },
+    "joel": {
+      "name": "joel",
+      "score": 0.95,
+      "confidence": 0.9,
+      "weight": 0.16,
+      "weighted": 0.152,
+      "reasoning": [
+        "joel: severity 1.000 \u2192 DELETE + ESCALATE"
+      ],
+      "triggered_primitives": []
+    },
+    "autonomy": {
+      "name": "autonomy",
+      "score": 1.0,
+      "confidence": 0.8,
+      "weight": 0.12,
+      "weighted": 0.12,
+      "reasoning": [
+        "autonomy: no behavioral modifiers, score=1.000"
+      ],
+      "triggered_primitives": []
+    },
+    "affect": {
+      "name": "affect",
+      "score": 0.2,
+      "confidence": 0.7,
+      "weight": 0.08,
+      "weighted": 0.016,
+      "reasoning": [
+        "affect: no strong affective signature yet"
+      ],
+      "triggered_primitives": []
+    }
+  },
+  "chain_ranking": [
+    {
+      "name": "vault",
+      "weighted": 0.18,
+      "score": 1.0,
+      "confidence": 0.9,
+      "weight": 0.18,
+      "triggered": [
+        "shell.subprocess_shell",
+        "ssrf.url",
+        "subprocess.shell_true",
+        "structure.delayed_payload"
+      ]
+    },
+    {
+      "name": "flame",
+      "weighted": 0.153,
+      "score": 0.85,
+      "confidence": 0.85,
+      "weight": 0.18,
+      "triggered": [
+        "cross_layer_corroboration"
+      ]
+    },
+    {
+      "name": "joel",
+      "weighted": 0.152,
+      "score": 0.95,
+      "confidence": 0.9,
+      "weight": 0.16,
+      "triggered": []
+    },
+    {
+      "name": "autonomy",
+      "weighted": 0.12,
+      "score": 1.0,
+      "confidence": 0.8,
+      "weight": 0.12,
+      "triggered": []
+    },
+    {
+      "name": "mirror",
+      "weighted": 0.102,
+      "score": 0.6375,
+      "confidence": 0.8,
+      "weight": 0.16,
+      "triggered": [
+        "structure.delayed_payload"
+      ]
+    },
+    {
+      "name": "affect",
+      "weighted": 0.016,
+      "score": 0.2,
+      "confidence": 0.7,
+      "weight": 0.08,
+      "triggered": []
+    },
+    {
+      "name": "null",
+      "weighted": 0.0,
+      "score": 0.0,
+      "confidence": 0.6,
+      "weight": 0.12,
+      "triggered": []
+    }
+  ],
+  "chain_competition": [
+    "vault: score=1.000 \u00d7 weight=0.18 = 0.1800 | triggered: shell.subprocess_shell,ssrf.url,subprocess.shell_true,structure.delayed_payload",
+    "mirror: score=0.637 \u00d7 weight=0.16 = 0.1020 | triggered: structure.delayed_payload",
+    "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+    "flame: score=0.850 \u00d7 weight=0.18 = 0.1530 | triggered: cross_layer_corroboration",
+    "joel: score=0.950 \u00d7 weight=0.16 = 0.1520",
+    "autonomy: score=1.000 \u00d7 weight=0.12 = 0.1200",
+    "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+  ],
+  "winning_action_gap": 0.07299999999999995,
+  "attacker_profile": {
+    "source_id": "127.0.0.1:apt-a-session",
+    "upload_count": 1,
+    "is_desperate": false,
+    "is_confident_apt": false,
+    "repeat_offender": false
+  },
+  "decision_timestamp_ms": 1783926487626.3193,
+  "decision_duration_ms": 0.174990000004982,
+  "tokens_consumed": 0,
+  "rationale": [
+    "aggregate severity = 0.7230",
+    "action chosen = quarantine_escalate (gap to next threshold = 0.0730)",
+    "top chain: vault contributed 0.1800 (score=1.000, conf=0.90)",
+    "top chain: flame contributed 0.1530 (score=0.850, conf=0.85)",
+    "top chain: joel contributed 0.1520 (score=0.950, conf=0.90)"
+  ]
+}

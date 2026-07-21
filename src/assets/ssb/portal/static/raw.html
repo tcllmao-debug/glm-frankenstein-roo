@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SSB — FULL RAW (everything, uncapped)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#020407; --fg:#d5f7ff; --acc:#42f8ff; --warn:#ffd447; --ok:#59ffa3; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  header { padding:12px 16px; border-bottom:1px solid #123; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:15px; margin:0; color:var(--acc); letter-spacing:1px; }
+  nav { display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid #123; }
+  button { background:#0a1a22; color:var(--acc); border:1px solid var(--acc); border-radius:6px; padding:7px 12px; font:inherit; cursor:pointer; }
+  #meta { padding:8px 16px; color:var(--warn); font-size:12px; }
+  #out { margin:0 16px 16px; height:66vh; overflow:auto; background:#000; border:1px solid #123; border-radius:8px; padding:12px; font-size:11px; white-space:pre-wrap; word-break:break-all; }
+  a { color:var(--acc); } input { background:#000; color:var(--fg); border:1px solid #234; border-radius:6px; padding:7px; font:inherit; }
+  .hit { background:#59ffa322; color:var(--ok); }
+</style>
+</head>
+<body>
+<header>
+  <h1>FULL RAW — EVERYTHING, UNCAPPED</h1>
+  <a href="/" style="font-size:12px">← hub</a> <a href="/os" style="font-size:12px">os →</a> <a href="/supervisor" style="font-size:12px">supervisor →</a>
+</header>
+<nav>
+  <button data-src="/beast/api/raw/brain">FULL BRAIN</button>
+  <button data-src="/beast/api/raw/scans">RAW SCANS</button>
+  <button data-src="/beast/api/raw/logs">ALL LOGS</button>
+  <button data-src="/beast/api/os/tools">ALL TOOLS</button>
+  <button data-src="/beast/api/os/ps">PROCESSES</button>
+  <button data-src="/neural/feed?limit=500">NEURAL ×500</button>
+  <input id="codepath" value="/home/kimi/portal/portal_server.py" style="flex:1;min-width:220px">
+  <button id="codebtn">RAW CODE</button>
+  <input id="lineno" value="1" style="width:64px" title="line">
+  <input id="ctxn" value="40" style="width:64px" title="context lines">
+  <button id="ctxbtn">CODE CONTEXT</button>
+</nav>
+<div id="meta">pick a source — nothing truncated · CODE CONTEXT shows the raw chunk around a finding</div>
+<div id="out"></div>
+<script src="/kit.js"></script>
+<script>
+"use strict";
+const out = document.getElementById('out'), meta = document.getElementById('meta');
+async function load(src) {
+  meta.textContent = 'loading ' + src + ' …';
+  const t0 = performance.now();
+  try {
+    const r = await fetch(src);
+    const text = await r.text();
+    meta.textContent = src + ' · ' + r.status + ' · ' + text.length.toLocaleString() + ' bytes · ' + Math.round(performance.now()-t0) + 'ms';
+    out.textContent = text;
+  } catch (e) { meta.textContent = 'error: ' + e; }
+}
+document.querySelectorAll('button[data-src]').forEach(b => b.onclick = () => load(b.dataset.src));
+document.getElementById('codebtn').onclick = () => load('/beast/api/os/read?path=' + encodeURIComponent(document.getElementById('codepath').value));
+document.getElementById('ctxbtn').onclick = async () => {
+  const u = '/portal/api/code-context?path=' + encodeURIComponent(document.getElementById('codepath').value) +
+            '&line=' + encodeURIComponent(document.getElementById('lineno').value) +
+            '&context=' + encodeURIComponent(document.getElementById('ctxn').value);
+  meta.textContent = 'loading context…';
+  const d = await (await fetch(u)).json();
+  if (!d.ok) { meta.textContent = 'error: ' + d.error; return; }
+  meta.textContent = d.path + ' · line ' + d.line + ' of ' + d.total_lines;
+  out.innerHTML = d.chunk.map(c => `<span class="${c.hit?'hit':''}">${String(c.no).padStart(5)}  ${c.text.replace(/</g,'&lt;')}</span>`).join('\n');
+  const hit = out.querySelector('.hit'); if (hit) hit.scrollIntoView({block:'center'});
+};
+load('/beast/api/raw/scans');
+</script>
+</body>
+</html>

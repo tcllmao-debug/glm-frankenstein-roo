@@ -1,0 +1,18 @@
+{
+  "/home/z/my-project/scripts/generate_attacker_files.py": "1e2fcd134309bf584491d94ee6d56db3f3837ae6207e50cb1a925cedaa818fd4",
+  "/home/z/my-project/scripts/content_scanner.py": "f509b88df446bd0ca741433dbd4e709071607adf148f4f23044ae62751a41299",
+  "/home/z/my-project/scripts/multi_chain_soft_ping.py": "42c655da17d3043304b36dfff3bb023a0c0b70808c93109c11cb91f5301d6137",
+  "/home/z/my-project/scripts/run_scanner_and_tests.sh": "b964ac001f28f06168c279f0277002e7decf551e62d9b4141268d5abf409c427",
+  "/home/z/my-project/scripts/filesystem_watcher.py": "44fc04438decda3c22871441e68eb3b3d4b488a00edda92c3568a2496fd8e557",
+  "/home/z/my-project/scripts/kernel_scanner.py": "197c7b3e46125ffd48bda165135478dcee867c4de22768028d5654a5a19b32cb",
+  "/home/z/my-project/scripts/quarantine_daemon.py": "b88277c4644b74fca1a332d333a4aa817c9c4f2dc28651b1c6911a3d6826d620",
+  "/home/z/my-project/scripts/self_heal.py": "6d036b45019a5b9808082db17b060c46c431b97bce30fb6ab41e2956352ad64a",
+  "/home/z/my-project/scripts/run_real_tests.py": "4b0b9582cff0ab382e1b8de8fba6536d2d3b7c3c45fc31d03b353e6cedb8cd92",
+  "/home/z/my-project/scripts/run_system_wide_test.sh": "e5349b425b599e76b3281d25357dc19deb4060111272498dff23e296f7a6a41b",
+  "/home/z/my-project/scripts/scanner_server.py": "745331e40cb4d03423600db0d7207c8969a7a2f33ada1b94fc114796291a95aa",
+  "/etc/passwd": "21d5de2dc39f2ceb19e33f8cc124b311b57a48aea6d7703a9a98b93079d412bd",
+  "/etc/group": "50a0d967c234879f6fde9d8910de9c7a3c2b7b60d0972442a4be405c776a8069",
+  "/etc/hosts": "bf29c85c0a4be3f22a85846e9a302a55bedf20c100093fde9b27ab7caeb86a01",
+  "/home/z/my-project/.gitignore": "a43d030ea79902a14c4c11a90e05e481355482708579d3e061f60a8e7787887b",
+  "/home/z/my-project/.env": "be8e1a92feff8f6cb699a9a70cc7d76a183538ab8c68a45e7d40f0d32bf20b94"
+}

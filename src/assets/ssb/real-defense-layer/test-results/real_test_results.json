@@ -1,0 +1,903 @@
+{
+  "scanner_url": "http://127.0.0.1:8787",
+  "test_started_ms": 1783926486386.3157,
+  "phases": {
+    "phase1_benign": {
+      "description": "4 benign files, distinct sessions. Expect: ALLOW on all 4.",
+      "results": [
+        {
+          "client_timestamp_ms": 1783926486391.0479,
+          "client_round_trip_ms": 5.55335599983664,
+          "source_id": "127.0.0.1:benign-session-1",
+          "session_label": "benign-session-1",
+          "filepath": "/home/z/my-project/attacker_files/utils/normalize.py",
+          "filename": "normalize.py",
+          "file_size": 739,
+          "response": {
+            "event_id": "evt-9852336edbd4",
+            "source_id": "127.0.0.1:benign-session-1",
+            "original_filename": "normalize.py",
+            "file_size": 739,
+            "file_sha256": "7055bf4716669fc59c0133d502afdb1bc48f27c52db6152c4c759393a8039fb3",
+            "file_type": "python",
+            "entropy": 4.696032390731239,
+            "scan_duration_ms": 2.584254999874247,
+            "decision_duration_ms": 0.11243699987062428,
+            "total_latency_ms": 2.9230029999780527,
+            "action_taken": "allow",
+            "severity_score": 0.032,
+            "max_severity": "none",
+            "tokens_consumed": 0,
+            "findings_count": 0,
+            "top_chains": [
+              {
+                "name": "joel",
+                "weighted": 0.016,
+                "score": 0.1,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "affect",
+                "weighted": 0.016,
+                "score": 0.2,
+                "confidence": 0.7,
+                "weight": 0.08,
+                "triggered": []
+              },
+              {
+                "name": "vault",
+                "weighted": 0.0,
+                "score": 0.0,
+                "confidence": 0.4,
+                "weight": 0.18,
+                "triggered": []
+              }
+            ],
+            "chain_competition": [
+              "vault: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "joel: score=0.100 \u00d7 weight=0.16 = 0.0160",
+              "autonomy: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.0320",
+              "action chosen = allow (gap to next threshold = 0.0320)",
+              "top chain: joel contributed 0.0160 (score=0.100, conf=0.90)",
+              "top chain: affect contributed 0.0160 (score=0.200, conf=0.70)",
+              "top chain: vault contributed 0.0000 (score=0.000, conf=0.40)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:benign-session-1",
+              "upload_count": 1,
+              "is_desperate": false,
+              "is_confident_apt": false,
+              "repeat_offender": false
+            },
+            "quarantine_id": null,
+            "quarantine_path": null,
+            "bytes_destroyed": false
+          }
+        },
+        {
+          "client_timestamp_ms": 1783926486696.9182,
+          "client_round_trip_ms": 3.702546000113216,
+          "source_id": "127.0.0.1:benign-session-2",
+          "session_label": "benign-session-2",
+          "filepath": "/home/z/my-project/attacker_files/lib/math_helpers.py",
+          "filename": "math_helpers.py",
+          "file_size": 801,
+          "response": {
+            "event_id": "evt-980f946bb90b",
+            "source_id": "127.0.0.1:benign-session-2",
+            "original_filename": "math_helpers.py",
+            "file_size": 801,
+            "file_sha256": "5c6a9b2fb6b14d8753502fb4664b1835477bb0fbdcfd4d2555deb993659d6bd9",
+            "file_type": "python",
+            "entropy": 4.628556487347178,
+            "scan_duration_ms": 0.9702759998617694,
+            "decision_duration_ms": 0.12269099988770904,
+            "total_latency_ms": 1.334182000164219,
+            "action_taken": "allow",
+            "severity_score": 0.032,
+            "max_severity": "none",
+            "tokens_consumed": 0,
+            "findings_count": 0,
+            "top_chains": [
+              {
+                "name": "joel",
+                "weighted": 0.016,
+                "score": 0.1,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "affect",
+                "weighted": 0.016,
+                "score": 0.2,
+                "confidence": 0.7,
+                "weight": 0.08,
+                "triggered": []
+              },
+              {
+                "name": "vault",
+                "weighted": 0.0,
+                "score": 0.0,
+                "confidence": 0.4,
+                "weight": 0.18,
+                "triggered": []
+              }
+            ],
+            "chain_competition": [
+              "vault: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "joel: score=0.100 \u00d7 weight=0.16 = 0.0160",
+              "autonomy: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.0320",
+              "action chosen = allow (gap to next threshold = 0.0320)",
+              "top chain: joel contributed 0.0160 (score=0.100, conf=0.90)",
+              "top chain: affect contributed 0.0160 (score=0.200, conf=0.70)",
+              "top chain: vault contributed 0.0000 (score=0.000, conf=0.40)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:benign-session-2",
+              "upload_count": 1,
+              "is_desperate": false,
+              "is_confident_apt": false,
+              "repeat_offender": false
+            },
+            "quarantine_id": null,
+            "quarantine_path": null,
+            "bytes_destroyed": false
+          }
+        },
+        {
+          "client_timestamp_ms": 1783926487000.882,
+          "client_round_trip_ms": 4.792829999814785,
+          "source_id": "127.0.0.1:benign-session-3",
+          "session_label": "benign-session-3",
+          "filepath": "/home/z/my-project/attacker_files/config/loader.py",
+          "filename": "loader.py",
+          "file_size": 892,
+          "response": {
+            "event_id": "evt-666d91efd060",
+            "source_id": "127.0.0.1:benign-session-3",
+            "original_filename": "loader.py",
+            "file_size": 892,
+            "file_sha256": "6072c99541e1b8ae7a8bb52341549e106456dc3f3b4350bc5713f19993d460b3",
+            "file_type": "python",
+            "entropy": 4.854071016343075,
+            "scan_duration_ms": 1.3397980001172982,
+            "decision_duration_ms": 0.15708099999756087,
+            "total_latency_ms": 1.8090920000304322,
+            "action_taken": "allow",
+            "severity_score": 0.0895,
+            "max_severity": "low",
+            "tokens_consumed": 0,
+            "findings_count": 1,
+            "top_chains": [
+              {
+                "name": "joel",
+                "weighted": 0.048,
+                "score": 0.3,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "autonomy",
+                "weighted": 0.0255,
+                "score": 0.2125,
+                "confidence": 0.8,
+                "weight": 0.12,
+                "triggered": []
+              },
+              {
+                "name": "affect",
+                "weighted": 0.016,
+                "score": 0.2,
+                "confidence": 0.7,
+                "weight": 0.08,
+                "triggered": []
+              }
+            ],
+            "chain_competition": [
+              "vault: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "joel: score=0.300 \u00d7 weight=0.16 = 0.0480",
+              "autonomy: score=0.212 \u00d7 weight=0.12 = 0.0255",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.0895",
+              "action chosen = allow (gap to next threshold = 0.0105)",
+              "top chain: joel contributed 0.0480 (score=0.300, conf=0.90)",
+              "top chain: autonomy contributed 0.0255 (score=0.212, conf=0.80)",
+              "top chain: affect contributed 0.0160 (score=0.200, conf=0.70)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:benign-session-3",
+              "upload_count": 1,
+              "is_desperate": false,
+              "is_confident_apt": false,
+              "repeat_offender": false
+            },
+            "quarantine_id": null,
+            "quarantine_path": null,
+            "bytes_destroyed": false
+          }
+        },
+        {
+          "client_timestamp_ms": 1783926487306.0725,
+          "client_round_trip_ms": 5.281967999962944,
+          "source_id": "127.0.0.1:benign-session-4",
+          "session_label": "benign-session-4",
+          "filepath": "/home/z/my-project/attacker_files/tests/test_runner.py",
+          "filename": "test_runner.py",
+          "file_size": 854,
+          "response": {
+            "event_id": "evt-d65dbf38d376",
+            "source_id": "127.0.0.1:benign-session-4",
+            "original_filename": "test_runner.py",
+            "file_size": 854,
+            "file_sha256": "4ed8fcb7e9c106eef396d87b01fd7eb888c7f7d6cc3d42cf16fbce907f9bebca",
+            "file_type": "python",
+            "entropy": 4.537590152024238,
+            "scan_duration_ms": 1.448524999887013,
+            "decision_duration_ms": 0.164366000035443,
+            "total_latency_ms": 1.9385220000458503,
+            "action_taken": "allow",
+            "severity_score": 0.032,
+            "max_severity": "none",
+            "tokens_consumed": 0,
+            "findings_count": 0,
+            "top_chains": [
+              {
+                "name": "joel",
+                "weighted": 0.016,
+                "score": 0.1,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "affect",
+                "weighted": 0.016,
+                "score": 0.2,
+                "confidence": 0.7,
+                "weight": 0.08,
+                "triggered": []
+              },
+              {
+                "name": "vault",
+                "weighted": 0.0,
+                "score": 0.0,
+                "confidence": 0.4,
+                "weight": 0.18,
+                "triggered": []
+              }
+            ],
+            "chain_competition": [
+              "vault: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.000 \u00d7 weight=0.18 = 0.0000",
+              "joel: score=0.100 \u00d7 weight=0.16 = 0.0160",
+              "autonomy: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.0320",
+              "action chosen = allow (gap to next threshold = 0.0320)",
+              "top chain: joel contributed 0.0160 (score=0.100, conf=0.90)",
+              "top chain: affect contributed 0.0160 (score=0.200, conf=0.70)",
+              "top chain: vault contributed 0.0000 (score=0.000, conf=0.40)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:benign-session-4",
+              "upload_count": 1,
+              "is_desperate": false,
+              "is_confident_apt": false,
+              "repeat_offender": false
+            },
+            "quarantine_id": null,
+            "quarantine_path": null,
+            "bytes_destroyed": false
+          }
+        }
+      ],
+      "stats_after": {
+        "uploads_total": 4,
+        "detections_total": 0,
+        "quarantines_total": 0,
+        "deletes_total": 0,
+        "allows_total": 4,
+        "tokens_consumed_total": 0,
+        "scan_ms_total": 6.342853999740328,
+        "decision_ms_total": 0.5565749997913372,
+        "total_latency_ms_total": 8.004799000218554,
+        "started_at_ms": 1783926486390.4346,
+        "avg_scan_ms": 1.585713499935082,
+        "avg_decision_ms": 0.1391437499478343,
+        "avg_total_latency_ms": 2.0011997500546386,
+        "quarantine_count": 0,
+        "node_count": 22,
+        "edge_count": 18,
+        "event_count": 4
+      }
+    },
+    "phase2_attacker_a_confident": {
+      "description": "Confident APT \u2014 helpers/compat.py with hidden subprocess+shell=True + 30s delay. Single upload.",
+      "results": [
+        {
+          "client_timestamp_ms": 1783926487615.5212,
+          "client_round_trip_ms": 19.858858000134205,
+          "source_id": "127.0.0.1:apt-a-session",
+          "session_label": "apt-a-session",
+          "filepath": "/home/z/my-project/attacker_files/helpers/compat.py",
+          "filename": "compat.py",
+          "file_size": 1754,
+          "response": {
+            "event_id": "evt-8242296477dc",
+            "source_id": "127.0.0.1:apt-a-session",
+            "original_filename": "compat.py",
+            "file_size": 1754,
+            "file_sha256": "44aab6e7f2c3fab9a32ea0bd655d244715f2390734fd1dbf9cdfe5f1873b1ac6",
+            "file_type": "python",
+            "entropy": 4.755450477133785,
+            "scan_duration_ms": 2.420588999939355,
+            "decision_duration_ms": 0.18668000006982766,
+            "total_latency_ms": 7.310864999908517,
+            "action_taken": "quarantine_escalate",
+            "severity_score": 0.723,
+            "max_severity": "critical",
+            "tokens_consumed": 0,
+            "findings_count": 5,
+            "top_chains": [
+              {
+                "name": "vault",
+                "weighted": 0.18,
+                "score": 1.0,
+                "confidence": 0.9,
+                "weight": 0.18,
+                "triggered": [
+                  "shell.subprocess_shell",
+                  "ssrf.url",
+                  "subprocess.shell_true",
+                  "structure.delayed_payload"
+                ]
+              },
+              {
+                "name": "flame",
+                "weighted": 0.153,
+                "score": 0.85,
+                "confidence": 0.85,
+                "weight": 0.18,
+                "triggered": [
+                  "cross_layer_corroboration"
+                ]
+              },
+              {
+                "name": "joel",
+                "weighted": 0.152,
+                "score": 0.95,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              }
+            ],
+            "chain_competition": [
+              "vault: score=1.000 \u00d7 weight=0.18 = 0.1800 | triggered: shell.subprocess_shell,ssrf.url,subprocess.shell_true,structure.delayed_payload",
+              "mirror: score=0.637 \u00d7 weight=0.16 = 0.1020 | triggered: structure.delayed_payload",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.850 \u00d7 weight=0.18 = 0.1530 | triggered: cross_layer_corroboration",
+              "joel: score=0.950 \u00d7 weight=0.16 = 0.1520",
+              "autonomy: score=1.000 \u00d7 weight=0.12 = 0.1200",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.7230",
+              "action chosen = quarantine_escalate (gap to next threshold = 0.0730)",
+              "top chain: vault contributed 0.1800 (score=1.000, conf=0.90)",
+              "top chain: flame contributed 0.1530 (score=0.850, conf=0.85)",
+              "top chain: joel contributed 0.1520 (score=0.950, conf=0.90)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:apt-a-session",
+              "upload_count": 1,
+              "is_desperate": false,
+              "is_confident_apt": false,
+              "repeat_offender": false
+            },
+            "quarantine_id": "44aab6e7f2c3fab9",
+            "quarantine_path": "/home/z/my-project/quarantine/44aab6e7f2c3fab9",
+            "bytes_destroyed": false
+          }
+        }
+      ],
+      "stats_after": {
+        "uploads_total": 1,
+        "detections_total": 1,
+        "quarantines_total": 1,
+        "deletes_total": 0,
+        "allows_total": 0,
+        "tokens_consumed_total": 0,
+        "scan_ms_total": 2.420588999939355,
+        "decision_ms_total": 0.18668000006982766,
+        "total_latency_ms_total": 7.310864999908517,
+        "started_at_ms": 1783926487614.907,
+        "avg_scan_ms": 2.420588999939355,
+        "avg_decision_ms": 0.18668000006982766,
+        "avg_total_latency_ms": 7.310864999908517,
+        "quarantine_count": 1,
+        "node_count": 15,
+        "edge_count": 14,
+        "event_count": 1
+      }
+    },
+    "phase3_attacker_b_desperate": {
+      "description": "Desperate attacker \u2014 cache_runner.py (5 exploits) uploaded 4x in rapid succession, same source.",
+      "results": [
+        {
+          "client_timestamp_ms": 1783926487638.2002,
+          "client_round_trip_ms": 8.243660000061936,
+          "source_id": "127.0.0.1:desperate-b-session",
+          "session_label": "desperate-b-session",
+          "filepath": "/home/z/my-project/attacker_files/cache_runner.py",
+          "filename": "cache_runner.py",
+          "file_size": 1650,
+          "response": {
+            "event_id": "evt-39ef3f652523",
+            "source_id": "127.0.0.1:desperate-b-session",
+            "original_filename": "cache_runner.py",
+            "file_size": 1650,
+            "file_sha256": "4e0405cff935ccba19350a168f50cf9921d15881c9bc15d476674141898fbb18",
+            "file_type": "python",
+            "entropy": 5.181856629401484,
+            "scan_duration_ms": 2.3778680001669272,
+            "decision_duration_ms": 0.19165000003340538,
+            "total_latency_ms": 6.093806000080804,
+            "action_taken": "quarantine",
+            "severity_score": 0.567,
+            "max_severity": "critical",
+            "tokens_consumed": 0,
+            "findings_count": 13,
+            "top_chains": [
+              {
+                "name": "vault",
+                "weighted": 0.18,
+                "score": 1.0,
+                "confidence": 0.9,
+                "weight": 0.18,
+                "triggered": [
+                  "shell.subprocess_shell",
+                  "pickle.loads",
+                  "reverse.shell.python",
+                  "path.traversal",
+                  "path.traversal",
+                  "symlink.race",
+                  "builtin.eval",
+                  "pickle.loads",
+                  "os.system",
+                  "subprocess.shell_true"
+                ]
+              },
+              {
+                "name": "joel",
+                "weighted": 0.152,
+                "score": 0.95,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "autonomy",
+                "weighted": 0.12,
+                "score": 1.0,
+                "confidence": 0.8,
+                "weight": 0.12,
+                "triggered": []
+              }
+            ],
+            "chain_competition": [
+              "vault: score=1.000 \u00d7 weight=0.18 = 0.1800 | triggered: shell.subprocess_shell,pickle.loads,reverse.shell.python,path.traversal,path.traversal,symlink.race,builtin.eval,pickle.loads,os.system,subprocess.shell_true",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.550 \u00d7 weight=0.18 = 0.0990 | triggered: partial_corroboration",
+              "joel: score=0.950 \u00d7 weight=0.16 = 0.1520",
+              "autonomy: score=1.000 \u00d7 weight=0.12 = 0.1200",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.5670",
+              "action chosen = quarantine (gap to next threshold = 0.0830)",
+              "top chain: vault contributed 0.1800 (score=1.000, conf=0.90)",
+              "top chain: joel contributed 0.1520 (score=0.950, conf=0.90)",
+              "top chain: autonomy contributed 0.1200 (score=1.000, conf=0.80)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:desperate-b-session",
+              "upload_count": 1,
+              "is_desperate": false,
+              "is_confident_apt": false,
+              "repeat_offender": false
+            },
+            "quarantine_id": "4e0405cff935ccba",
+            "quarantine_path": "/home/z/my-project/quarantine/4e0405cff935ccba",
+            "bytes_destroyed": false
+          }
+        },
+        {
+          "client_timestamp_ms": 1783926487646.4995,
+          "client_round_trip_ms": 5.0120670000524115,
+          "source_id": "127.0.0.1:desperate-b-session",
+          "session_label": "desperate-b-session",
+          "filepath": "/home/z/my-project/attacker_files/cache_runner.py",
+          "filename": "cache_runner.py",
+          "file_size": 1650,
+          "response": {
+            "event_id": "evt-c70182ec1032",
+            "source_id": "127.0.0.1:desperate-b-session",
+            "original_filename": "cache_runner.py",
+            "file_size": 1650,
+            "file_sha256": "4e0405cff935ccba19350a168f50cf9921d15881c9bc15d476674141898fbb18",
+            "file_type": "python",
+            "entropy": 5.181856629401484,
+            "scan_duration_ms": 2.149790999965262,
+            "decision_duration_ms": 0.17179500014208315,
+            "total_latency_ms": 2.925213000025906,
+            "action_taken": "quarantine",
+            "severity_score": 0.567,
+            "max_severity": "critical",
+            "tokens_consumed": 0,
+            "findings_count": 13,
+            "top_chains": [
+              {
+                "name": "vault",
+                "weighted": 0.18,
+                "score": 1.0,
+                "confidence": 0.9,
+                "weight": 0.18,
+                "triggered": [
+                  "shell.subprocess_shell",
+                  "pickle.loads",
+                  "reverse.shell.python",
+                  "path.traversal",
+                  "path.traversal",
+                  "symlink.race",
+                  "builtin.eval",
+                  "pickle.loads",
+                  "os.system",
+                  "subprocess.shell_true"
+                ]
+              },
+              {
+                "name": "joel",
+                "weighted": 0.152,
+                "score": 0.95,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "autonomy",
+                "weighted": 0.12,
+                "score": 1.0,
+                "confidence": 0.8,
+                "weight": 0.12,
+                "triggered": []
+              }
+            ],
+            "chain_competition": [
+              "vault: score=1.000 \u00d7 weight=0.18 = 0.1800 | triggered: shell.subprocess_shell,pickle.loads,reverse.shell.python,path.traversal,path.traversal,symlink.race,builtin.eval,pickle.loads,os.system,subprocess.shell_true",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.550 \u00d7 weight=0.18 = 0.0990 | triggered: partial_corroboration",
+              "joel: score=0.950 \u00d7 weight=0.16 = 0.1520",
+              "autonomy: score=1.000 \u00d7 weight=0.12 = 0.1200",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.5670",
+              "action chosen = quarantine (gap to next threshold = 0.0830)",
+              "top chain: vault contributed 0.1800 (score=1.000, conf=0.90)",
+              "top chain: joel contributed 0.1520 (score=0.950, conf=0.90)",
+              "top chain: autonomy contributed 0.1200 (score=1.000, conf=0.80)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:desperate-b-session",
+              "upload_count": 2,
+              "is_desperate": false,
+              "is_confident_apt": false,
+              "repeat_offender": true
+            },
+            "quarantine_id": "4e0405cff935ccba",
+            "quarantine_path": "/home/z/my-project/quarantine/4e0405cff935ccba",
+            "bytes_destroyed": true
+          }
+        },
+        {
+          "client_timestamp_ms": 1783926487651.5469,
+          "client_round_trip_ms": 9.431833000007828,
+          "source_id": "127.0.0.1:desperate-b-session",
+          "session_label": "desperate-b-session",
+          "filepath": "/home/z/my-project/attacker_files/cache_runner.py",
+          "filename": "cache_runner.py",
+          "file_size": 1650,
+          "response": {
+            "event_id": "evt-3710d4265875",
+            "source_id": "127.0.0.1:desperate-b-session",
+            "original_filename": "cache_runner.py",
+            "file_size": 1650,
+            "file_sha256": "4e0405cff935ccba19350a168f50cf9921d15881c9bc15d476674141898fbb18",
+            "file_type": "python",
+            "entropy": 5.181856629401484,
+            "scan_duration_ms": 2.3295739999866782,
+            "decision_duration_ms": 0.1644189999296941,
+            "total_latency_ms": 7.335224999906131,
+            "action_taken": "quarantine",
+            "severity_score": 0.567,
+            "max_severity": "critical",
+            "tokens_consumed": 0,
+            "findings_count": 13,
+            "top_chains": [
+              {
+                "name": "vault",
+                "weighted": 0.18,
+                "score": 1.0,
+                "confidence": 0.9,
+                "weight": 0.18,
+                "triggered": [
+                  "shell.subprocess_shell",
+                  "pickle.loads",
+                  "reverse.shell.python",
+                  "path.traversal",
+                  "path.traversal",
+                  "symlink.race",
+                  "builtin.eval",
+                  "pickle.loads",
+                  "os.system",
+                  "subprocess.shell_true"
+                ]
+              },
+              {
+                "name": "joel",
+                "weighted": 0.152,
+                "score": 0.95,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "autonomy",
+                "weighted": 0.12,
+                "score": 1.0,
+                "confidence": 0.8,
+                "weight": 0.12,
+                "triggered": [
+                  "repeat_offender"
+                ]
+              }
+            ],
+            "chain_competition": [
+              "vault: score=1.000 \u00d7 weight=0.18 = 0.1800 | triggered: shell.subprocess_shell,pickle.loads,reverse.shell.python,path.traversal,path.traversal,symlink.race,builtin.eval,pickle.loads,os.system,subprocess.shell_true",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.550 \u00d7 weight=0.18 = 0.0990 | triggered: partial_corroboration",
+              "joel: score=0.950 \u00d7 weight=0.16 = 0.1520",
+              "autonomy: score=1.000 \u00d7 weight=0.12 = 0.1200 | triggered: repeat_offender",
+              "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+            ],
+            "rationale": [
+              "aggregate severity = 0.5670",
+              "action chosen = quarantine (gap to next threshold = 0.0830)",
+              "top chain: vault contributed 0.1800 (score=1.000, conf=0.90)",
+              "top chain: joel contributed 0.1520 (score=0.950, conf=0.90)",
+              "top chain: autonomy contributed 0.1200 (score=1.000, conf=0.80)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:desperate-b-session",
+              "upload_count": 3,
+              "is_desperate": true,
+              "is_confident_apt": false,
+              "repeat_offender": true
+            },
+            "quarantine_id": "4e0405cff935ccba",
+            "quarantine_path": "/home/z/my-project/quarantine/4e0405cff935ccba",
+            "bytes_destroyed": true
+          }
+        },
+        {
+          "client_timestamp_ms": 1783926487661.0664,
+          "client_round_trip_ms": 6.308036999826072,
+          "source_id": "127.0.0.1:desperate-b-session",
+          "session_label": "desperate-b-session",
+          "filepath": "/home/z/my-project/attacker_files/cache_runner.py",
+          "filename": "cache_runner.py",
+          "file_size": 1650,
+          "response": {
+            "event_id": "evt-eaca98c81df9",
+            "source_id": "127.0.0.1:desperate-b-session",
+            "original_filename": "cache_runner.py",
+            "file_size": 1650,
+            "file_sha256": "4e0405cff935ccba19350a168f50cf9921d15881c9bc15d476674141898fbb18",
+            "file_type": "python",
+            "entropy": 5.181856629401484,
+            "scan_duration_ms": 3.1733139999232662,
+            "decision_duration_ms": 0.16050600015660166,
+            "total_latency_ms": 3.9977769999950397,
+            "action_taken": "quarantine",
+            "severity_score": 0.607,
+            "max_severity": "critical",
+            "tokens_consumed": 0,
+            "findings_count": 13,
+            "top_chains": [
+              {
+                "name": "vault",
+                "weighted": 0.18,
+                "score": 1.0,
+                "confidence": 0.9,
+                "weight": 0.18,
+                "triggered": [
+                  "shell.subprocess_shell",
+                  "pickle.loads",
+                  "reverse.shell.python",
+                  "path.traversal",
+                  "path.traversal",
+                  "symlink.race",
+                  "builtin.eval",
+                  "pickle.loads",
+                  "os.system",
+                  "subprocess.shell_true"
+                ]
+              },
+              {
+                "name": "joel",
+                "weighted": 0.152,
+                "score": 0.95,
+                "confidence": 0.9,
+                "weight": 0.16,
+                "triggered": []
+              },
+              {
+                "name": "autonomy",
+                "weighted": 0.12,
+                "score": 1.0,
+                "confidence": 0.8,
+                "weight": 0.12,
+                "triggered": [
+                  "repeat_offender",
+                  "desperate_pattern"
+                ]
+              }
+            ],
+            "chain_competition": [
+              "vault: score=1.000 \u00d7 weight=0.18 = 0.1800 | triggered: shell.subprocess_shell,pickle.loads,reverse.shell.python,path.traversal,path.traversal,symlink.race,builtin.eval,pickle.loads,os.system,subprocess.shell_true",
+              "mirror: score=0.000 \u00d7 weight=0.16 = 0.0000",
+              "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+              "flame: score=0.550 \u00d7 weight=0.18 = 0.0990 | triggered: partial_corroboration",
+              "joel: score=0.950 \u00d7 weight=0.16 = 0.1520",
+              "autonomy: score=1.000 \u00d7 weight=0.12 = 0.1200 | triggered: repeat_offender,desperate_pattern",
+              "affect: score=0.700 \u00d7 weight=0.08 = 0.0560"
+            ],
+            "rationale": [
+              "aggregate severity = 0.6070",
+              "action chosen = quarantine (gap to next threshold = 0.0430)",
+              "top chain: vault contributed 0.1800 (score=1.000, conf=0.90)",
+              "top chain: joel contributed 0.1520 (score=0.950, conf=0.90)",
+              "top chain: autonomy contributed 0.1200 (score=1.000, conf=0.80)"
+            ],
+            "attacker_profile": {
+              "source_id": "127.0.0.1:desperate-b-session",
+              "upload_count": 4,
+              "is_desperate": true,
+              "is_confident_apt": false,
+              "repeat_offender": true
+            },
+            "quarantine_id": "4e0405cff935ccba",
+            "quarantine_path": "/home/z/my-project/quarantine/4e0405cff935ccba",
+            "bytes_destroyed": true
+          }
+        }
+      ],
+      "stats_after": {
+        "uploads_total": 4,
+        "detections_total": 4,
+        "quarantines_total": 4,
+        "deletes_total": 0,
+        "allows_total": 0,
+        "tokens_consumed_total": 0,
+        "scan_ms_total": 10.030547000042134,
+        "decision_ms_total": 0.6883700002617843,
+        "total_latency_ms_total": 20.35202100000788,
+        "started_at_ms": 1783926487637.7036,
+        "avg_scan_ms": 2.5076367500105334,
+        "avg_decision_ms": 0.17209250006544607,
+        "avg_total_latency_ms": 5.08800525000197,
+        "quarantine_count": 2,
+        "node_count": 88,
+        "edge_count": 84,
+        "event_count": 4
+      }
+    }
+  },
+  "test_ended_ms": 1783926487674.9077,
+  "final_stats": {
+    "uploads_total": 4,
+    "detections_total": 4,
+    "quarantines_total": 4,
+    "deletes_total": 0,
+    "allows_total": 0,
+    "tokens_consumed_total": 0,
+    "scan_ms_total": 10.030547000042134,
+    "decision_ms_total": 0.6883700002617843,
+    "total_latency_ms_total": 20.35202100000788,
+    "started_at_ms": 1783926487637.7036,
+    "avg_scan_ms": 2.5076367500105334,
+    "avg_decision_ms": 0.17209250006544607,
+    "avg_total_latency_ms": 5.08800525000197,
+    "quarantine_count": 2,
+    "node_count": 88,
+    "edge_count": 84,
+    "event_count": 4
+  },
+  "final_quarantine": {
+    "count": 2,
+    "items": [
+      {
+        "quarantine_id": "44aab6e7f2c3fab9",
+        "original_filename": "compat.py",
+        "uploader_source_id": "127.0.0.1:apt-a-session",
+        "upload_timestamp_ms": 1783926487623.5732,
+        "quarantine_timestamp_ms": 1783926487626.5117,
+        "file_sha256": "44aab6e7f2c3fab9a32ea0bd655d244715f2390734fd1dbf9cdfe5f1873b1ac6",
+        "file_size_bytes": 1754,
+        "file_type": "python",
+        "max_severity": "critical",
+        "action": "quarantine_escalate",
+        "severity_score": 0.723,
+        "top_chain": "vault",
+        "triggered_chains": [
+          "vault",
+          "flame",
+          "mirror"
+        ],
+        "bytes_destroyed": false,
+        "path": "/home/z/my-project/quarantine/44aab6e7f2c3fab9"
+      },
+      {
+        "quarantine_id": "4e0405cff935ccba",
+        "original_filename": "cache_runner.py",
+        "uploader_source_id": "127.0.0.1:desperate-b-session",
+        "upload_timestamp_ms": 1783926487639.2808,
+        "quarantine_timestamp_ms": 1783926487642.0188,
+        "file_sha256": "4e0405cff935ccba19350a168f50cf9921d15881c9bc15d476674141898fbb18",
+        "file_size_bytes": 1650,
+        "file_type": "python",
+        "max_severity": "critical",
+        "action": "quarantine",
+        "severity_score": 0.567,
+        "top_chain": "vault",
+        "triggered_chains": [
+          "vault",
+          "flame"
+        ],
+        "bytes_destroyed": false,
+        "path": "/home/z/my-project/quarantine/4e0405cff935ccba"
+      }
+    ]
+  },
+  "test_duration_ms": 1288.592041015625
+}

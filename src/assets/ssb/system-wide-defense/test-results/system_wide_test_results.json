@@ -1,0 +1,230 @@
+{
+  "test_started_ms": 1783931173797.9382,
+  "phases": {
+    "phase0": {
+      "service": "SSB V11 Z MARK \u2014 Real Defense Layer (System-Wide)",
+      "version": "12.0.0-zmark-system-wide",
+      "defense_layers": {
+        "upload_scanner": "active (POST /api/upload)",
+        "filesystem_watcher": "active (98 dirs watched)",
+        "kernel_scanner": "active (11 PIDs tracked)",
+        "self_heal": "active (16 files protected)"
+      },
+      "endpoints": [
+        "POST /api/upload",
+        "GET  /api/health",
+        "GET  /api/stats",
+        "GET  /api/quarantine",
+        "GET  /api/quarantine/{qid}",
+        "GET  /api/audit",
+        "GET  /api/audit/event/{eid}",
+        "GET  /api/events",
+        "GET  /api/nodes",
+        "GET  /api/god-eye",
+        "GET  /api/filesystem/stats",
+        "GET  /api/filesystem/events",
+        "GET  /api/kernel/stats",
+        "GET  /api/kernel/findings",
+        "GET  /api/self-heal/stats",
+        "GET  /api/self-heal/events",
+        "GET  /api/self-heal/baseline",
+        "GET  /api/system-defense",
+        "POST /api/self-heal/rebaseline",
+        "POST /api/test/reset"
+      ],
+      "tokens_consumed_total": 0
+    },
+    "phase1_upload": {
+      "event_id": "evt-b5751b124d2f",
+      "source_id": "127.0.0.1:sys-wide-test",
+      "original_filename": "compat.py",
+      "file_size": 1754,
+      "file_sha256": "44aab6e7f2c3fab9a32ea0bd655d244715f2390734fd1dbf9cdfe5f1873b1ac6",
+      "file_type": "python",
+      "entropy": 4.755450477133785,
+      "scan_duration_ms": 5.139273000168032,
+      "decision_duration_ms": 0.20492300063779112,
+      "total_latency_ms": 9.02057999974204,
+      "action_taken": "quarantine_escalate",
+      "severity_score": 0.723,
+      "max_severity": "critical",
+      "tokens_consumed": 0,
+      "findings_count": 5,
+      "top_chains": [
+        {
+          "name": "vault",
+          "weighted": 0.18,
+          "score": 1.0,
+          "confidence": 0.9,
+          "weight": 0.18,
+          "triggered": [
+            "shell.subprocess_shell",
+            "ssrf.url",
+            "subprocess.shell_true",
+            "structure.delayed_payload"
+          ]
+        },
+        {
+          "name": "flame",
+          "weighted": 0.153,
+          "score": 0.85,
+          "confidence": 0.85,
+          "weight": 0.18,
+          "triggered": [
+            "cross_layer_corroboration"
+          ]
+        },
+        {
+          "name": "joel",
+          "weighted": 0.152,
+          "score": 0.95,
+          "confidence": 0.9,
+          "weight": 0.16,
+          "triggered": []
+        }
+      ],
+      "chain_competition": [
+        "vault: score=1.000 \u00d7 weight=0.18 = 0.1800 | triggered: shell.subprocess_shell,ssrf.url,subprocess.shell_true,structure.delayed_payload",
+        "mirror: score=0.637 \u00d7 weight=0.16 = 0.1020 | triggered: structure.delayed_payload",
+        "null: score=0.000 \u00d7 weight=0.12 = 0.0000",
+        "flame: score=0.850 \u00d7 weight=0.18 = 0.1530 | triggered: cross_layer_corroboration",
+        "joel: score=0.950 \u00d7 weight=0.16 = 0.1520",
+        "autonomy: score=1.000 \u00d7 weight=0.12 = 0.1200",
+        "affect: score=0.200 \u00d7 weight=0.08 = 0.0160"
+      ],
+      "rationale": [
+        "aggregate severity = 0.7230",
+        "action chosen = quarantine_escalate (gap to next threshold = 0.0730)",
+        "top chain: vault contributed 0.1800 (score=1.000, conf=0.90)",
+        "top chain: flame contributed 0.1530 (score=0.850, conf=0.85)",
+        "top chain: joel contributed 0.1520 (score=0.950, conf=0.90)"
+      ],
+      "attacker_profile": {
+        "source_id": "127.0.0.1:sys-wide-test",
+        "upload_count": 1,
+        "is_desperate": false,
+        "is_confident_apt": false,
+        "repeat_offender": false
+      },
+      "quarantine_id": "44aab6e7f2c3fab9",
+      "quarantine_path": "/home/z/my-project/quarantine/44aab6e7f2c3fab9",
+      "bytes_destroyed": false
+    },
+    "phase2_fs_watcher": {
+      "detected": true,
+      "file_quarantined": true,
+      "event": {
+        "timestamp_ms": 1783931173847.4673,
+        "path": "/tmp/system_update.py",
+        "event_mask": 256,
+        "event_type": "CREATE",
+        "is_directory": false,
+        "action_taken": "quarantine",
+        "scan_severity": 0.567,
+        "quarantine_id": "dcd4d37b7f3e6943",
+        "file_size": 126,
+        "file_hash": "dcd4d37b7f3e6943",
+        "error": null
+      },
+      "fs_stats": {
+        "events_total": 11,
+        "files_scanned": 1,
+        "files_quarantined": 1,
+        "files_allowed": 0,
+        "errors": 0,
+        "started_at_ms": 1783931127659.2346,
+        "watches_active": 98,
+        "uptime_ms": 46658.314453125,
+        "loop_iterations": 916,
+        "last_error": null,
+        "thread_alive": true
+      }
+    },
+    "phase3_kernel": {
+      "findings_for_pid": [],
+      "kernel_stats": {
+        "scans_total": 0,
+        "findings_total": 48,
+        "processes_seen": 18,
+        "connections_seen": 0,
+        "started_at_ms": 1783931127659.2437,
+        "current_pids": 11,
+        "scanner_pids": [
+          2280
+        ],
+        "uptime_ms": 48665.273193359375
+      }
+    },
+    "phase4_self_heal": {
+      "was_reverted": true,
+      "heal_event": {
+        "timestamp_ms": 1783931176594.9946,
+        "path": "/home/z/my-project/scripts/content_scanner.py",
+        "event_type": "modified",
+        "old_hash": "f509b88df446bd0ca741433dbd4e709071607adf148f4f23044ae62751a41299",
+        "new_hash": "90eee01cdc1474b0c70a99d8df6ab39452c927917f4d4bffda171cab9b374a7a",
+        "action_taken": "reverted",
+        "quarantine_id": "90eee01cdc1474b0",
+        "error": null
+      },
+      "heal_stats": {
+        "checks_total": 17,
+        "heals_total": 1,
+        "reverts_total": 1,
+        "restores_total": 0,
+        "new_unauthorized_total": 1,
+        "errors_total": 0,
+        "started_at_ms": 1783931127664.2473,
+        "protected_files": 16,
+        "uptime_ms": 49665.177490234375
+      }
+    },
+    "phase5_aggregate": {
+      "scanner_server": {
+        "uploads_total": 1,
+        "quarantines_total": 1,
+        "tokens_consumed": 0
+      },
+      "filesystem_watcher": {
+        "events_total": 11,
+        "files_scanned": 1,
+        "files_quarantined": 1,
+        "files_allowed": 0,
+        "errors": 0,
+        "started_at_ms": 1783931127659.2346,
+        "watches_active": 98,
+        "uptime_ms": 49671.39794921875,
+        "loop_iterations": 976,
+        "last_error": null,
+        "thread_alive": true
+      },
+      "kernel_scanner": {
+        "scans_total": 0,
+        "findings_total": 49,
+        "processes_seen": 22,
+        "connections_seen": 0,
+        "started_at_ms": 1783931127659.2437,
+        "current_pids": 11,
+        "scanner_pids": [
+          2280
+        ],
+        "uptime_ms": 49671.40478515625
+      },
+      "self_heal": {
+        "checks_total": 17,
+        "heals_total": 1,
+        "reverts_total": 1,
+        "restores_total": 0,
+        "new_unauthorized_total": 1,
+        "errors_total": 0,
+        "started_at_ms": 1783931127664.2473,
+        "protected_files": 16,
+        "uptime_ms": 49666.404541015625
+      },
+      "defense_layers_active": 4,
+      "system_wide_protection": true
+    }
+  },
+  "test_ended_ms": 1783931177331.3064,
+  "test_duration_ms": 3533.3681640625
+}

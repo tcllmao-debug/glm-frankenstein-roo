@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SSB BEAST GODSCOPE</title>
+<style>
+/* ============================================================
+   SSB BEAST GODSCOPE — M2 flagship GUI
+   Pure-black neon theme. No external fonts / CDNs. All inline.
+   ============================================================ */
+:root{
+  --cyan:#42f8ff; --mag:#ff2bd6; --grn:#7dffca; --amb:#ffd447; --red:#ff1765;
+  --bg:#000000; --panel:rgba(6,12,16,.88); --panel2:rgba(10,18,24,.92);
+  --border:rgba(66,248,255,.34); --border-dim:rgba(66,248,255,.16);
+  --txt:#bfe9ee; --dim:#5d8a93;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:"Courier New", ui-monospace, Menlo, Consolas, monospace;
+  font-size:12px; overflow:hidden;
+}
+/* animated backdrop grid */
+.bggrid{
+  position:fixed; inset:-60px; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(66,248,255,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(66,248,255,.055) 1px, transparent 1px);
+  background-size:44px 44px;
+  animation:gridmove 16s linear infinite;
+}
+@keyframes gridmove{ to{ transform:translate(44px,44px);} }
+.bgglow{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 50% 0%, rgba(66,248,255,.06), transparent 70%),
+    radial-gradient(50% 40% at 85% 100%, rgba(255,43,214,.05), transparent 70%),
+    radial-gradient(40% 35% at 8% 90%, rgba(125,255,202,.04), transparent 70%);
+}
+/* scanlines over everything (non-interactive) */
+body::after{
+  content:''; position:fixed; inset:0; z-index:90; pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.20) 0 1px, transparent 1px 3px);
+}
+/* ------------ app grid layout ------------ */
+#app{
+  position:fixed; inset:0; z-index:1; display:grid;
+  grid-template-columns:266px minmax(0,1fr) 334px;
+  grid-template-rows:48px minmax(0,1fr) 218px;
+  grid-template-areas:
+    'toolbar toolbar toolbar'
+    'left    center  right'
+    'bottom  bottom  bottom';
+  gap:4px; padding:4px;
+}
+.panel{
+  background:var(--panel); border:1px solid var(--border);
+  display:flex; flex-direction:column; min-width:0; min-height:0;
+  box-shadow:0 0 18px rgba(66,248,255,.05) inset, 0 0 12px rgba(0,0,0,.6);
+}
+.phead{
+  flex:none; display:flex; align-items:center; gap:8px; padding:5px 9px;
+  border-bottom:1px solid var(--border-dim); color:var(--cyan);
+  font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+  text-shadow:0 0 7px rgba(66,248,255,.65); white-space:nowrap; overflow:hidden;
+}
+.phead .spacer{flex:1;}
+.pbody{flex:1; overflow:auto; min-height:0; padding:4px;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:rgba(66,248,255,.03);}
+::-webkit-scrollbar-thumb{background:rgba(66,248,255,.22); border:1px solid rgba(66,248,255,.12);}
+::-webkit-scrollbar-thumb:hover{background:rgba(66,248,255,.4);}
+/* ------------ toolbar ------------ */
+#toolbar{grid-area:toolbar; display:flex; flex-direction:row; align-items:center; gap:8px; padding:0 10px; flex-wrap:nowrap; overflow:hidden;}
+.brand{
+  color:#fff; font-size:15px; letter-spacing:3px; font-weight:bold; white-space:nowrap;
+  text-shadow:0 0 6px var(--cyan), 0 0 18px rgba(66,248,255,.55);
+  animation:brandflicker 7s infinite;
+}
+@keyframes brandflicker{ 0%,93%,96%,100%{opacity:1;} 94%,95%{opacity:.55;} }
+.brand .b2{color:var(--mag); text-shadow:0 0 8px var(--mag);}
+.chip{
+  border:1px solid var(--border-dim); padding:3px 8px; font-size:10px; color:var(--dim);
+  background:rgba(66,248,255,.04); white-space:nowrap; letter-spacing:1px;
+}
+.chip b{color:var(--cyan); font-weight:bold; text-shadow:0 0 6px rgba(66,248,255,.5);}
+.chip.warn b{color:var(--amb);} .chip.bad b{color:var(--red);}
+.btn{
+  background:rgba(66,248,255,.05); border:1px solid var(--border); color:var(--cyan);
+  font:inherit; font-size:10px; letter-spacing:1.2px; padding:5px 10px; cursor:pointer;
+  text-transform:uppercase; white-space:nowrap;
+}
+.btn:hover{background:rgba(66,248,255,.17); color:#fff; box-shadow:0 0 12px rgba(66,248,255,.35);}
+.btn.on{background:rgba(255,43,214,.14); border-color:var(--mag); color:var(--mag); box-shadow:0 0 10px rgba(255,43,214,.3);}
+.btn.small{padding:2px 7px; font-size:9px;}
+.btn:disabled{opacity:.4; cursor:default;}
+.ctl{display:flex; align-items:center; gap:5px; color:var(--dim); font-size:10px; letter-spacing:1px;}
+input[type=range]{ -webkit-appearance:none; width:110px; height:3px; background:rgba(66,248,255,.3); outline:none; cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:11px; height:11px; background:var(--cyan);
+  border:1px solid #001014; box-shadow:0 0 8px var(--cyan); cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;background:var(--cyan);border:1px solid #001014;box-shadow:0 0 8px var(--cyan);cursor:pointer;}
+#speedval{color:var(--grn); min-width:44px; text-shadow:0 0 6px rgba(125,255,202,.5);}
+/* ------------ left sidebar ------------ */
+#left{grid-area:left;}
+#left .pbody{padding:2px;}
+.sec-flex{flex:1 1 0; display:flex; flex-direction:column; min-height:0; border-bottom:1px solid var(--border-dim);}
+#syslogbox{flex:none; height:104px; display:flex; flex-direction:column;}
+#syslog{font-size:10px; line-height:1.45; color:var(--dim); overflow:auto; flex:1; padding:3px 6px;}
+#syslog .t{color:#3a5b62;}
+#syslog .ok{color:var(--grn);} #syslog .err{color:var(--red);} #syslog .inf{color:var(--cyan);} #syslog .warn{color:var(--amb);}
+/* knowledge tree */
+.tree-node{user-select:none;}
+.tree-row{display:flex; align-items:center; gap:4px; padding:1px 2px; cursor:pointer; white-space:nowrap;}
+.tree-row:hover{background:rgba(66,248,255,.08);}
+.tree-row .tw{width:12px; color:var(--amb); flex:none; text-align:center;}
+.tree-row .ic{flex:none;}
+.tree-row .nm{overflow:hidden; text-overflow:ellipsis;}
+.tree-row.dir .nm{color:var(--cyan);}
+.tree-row.file .nm{color:var(--txt);}
+.tree-kids{margin-left:14px; border-left:1px dotted rgba(66,248,255,.18); padding-left:3px;}
+.tree-meta{color:var(--dim); font-size:9px; margin-left:6px;}
+/* endpoint catalog */
+.ep{padding:3px 6px; cursor:pointer; border-bottom:1px solid rgba(66,248,255,.06);}
+.ep:hover{background:rgba(125,255,202,.07);}
+.ep .m{color:var(--amb); font-size:9px; letter-spacing:1px;}
+.ep .p{color:var(--grn); font-size:10px; word-break:break-all;}
+.ep .d{color:var(--dim); font-size:9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+/* ------------ center ------------ */
+#center{grid-area:center;}
+#vizbar{flex:none; display:flex; gap:4px; padding:4px 6px; border-bottom:1px solid var(--border-dim); flex-wrap:wrap; align-items:center;}
+#viewport{flex:1; position:relative; min-height:0; overflow:hidden; background:radial-gradient(120% 100% at 50% 40%, rgba(3,10,14,.4), rgba(0,0,0,.85));}
+#cv{position:absolute; inset:0; width:100%; height:100%; display:block; cursor:crosshair;}
+#tip{
+  position:absolute; z-index:20; pointer-events:none; display:none; max-width:320px;
+  background:rgba(2,10,14,.95); border:1px solid var(--cyan); padding:5px 8px; font-size:10px;
+  color:var(--txt); box-shadow:0 0 14px rgba(66,248,255,.35);
+}
+#tip .tl{color:#fff; text-shadow:0 0 6px var(--cyan);}
+#tip .tk{color:var(--mag);} #tip .td{color:var(--dim);}
+#vizopts{
+  position:absolute; left:8px; right:8px; bottom:30px; z-index:15; display:none;
+  background:rgba(3,12,16,.9); border:1px solid var(--border-dim); padding:6px 10px;
+  align-items:center; gap:10px; font-size:10px; color:var(--dim);
+}
+#vizopts.show{display:flex;}
+#fslider{flex:1;}
+#fread{color:var(--amb); min-width:130px; text-shadow:0 0 6px rgba(255,212,71,.4);}
+#fmarks{position:absolute; left:110px; right:250px; top:0; height:100%; pointer-events:none;}
+.mark{position:absolute; top:9px; width:2px; height:7px; background:var(--mag); box-shadow:0 0 5px var(--mag); pointer-events:none;}
+#whereami{
+  position:absolute; left:0; right:0; bottom:0; z-index:14; height:24px; display:flex; align-items:center; gap:14px;
+  padding:0 10px; font-size:10px; color:var(--dim); background:rgba(2,8,11,.85); border-top:1px solid var(--border-dim);
+  white-space:nowrap; overflow:hidden;
+}
+#whereami .wv{color:var(--cyan);} #whereami .wf{color:var(--amb);} #whereami .ws{color:var(--grn);}
+/* ------------ right inspector ------------ */
+#right{grid-area:right;}
+#insp-id{color:#fff; text-shadow:0 0 7px var(--mag); word-break:break-all;}
+#nodejson{
+  font-size:10px; line-height:1.4; color:var(--txt); background:rgba(0,0,0,.35);
+  border:1px solid rgba(66,248,255,.1); padding:6px; overflow:auto; max-height:38%;
+  white-space:pre-wrap; word-break:break-word; flex:none; margin:4px;
+}
+.jkey{color:var(--cyan);} .jstr{color:var(--grn);} .jnum{color:var(--amb);} .jbool{color:var(--mag);} .jnull{color:var(--red);}
+#edgelist{flex:1; overflow:auto; padding:2px 4px;}
+.eedge{display:flex; align-items:center; gap:6px; padding:2px 4px; border-bottom:1px solid rgba(66,248,255,.06); font-size:10px;}
+.eedge:hover{background:rgba(66,248,255,.07);}
+.eedge .ar{flex:none; width:14px; text-align:center;}
+.eedge .ar.out{color:var(--grn);} .eedge .ar.in{color:var(--amb);}
+.eedge .kd{flex:none; padding:0 5px; border:1px solid var(--border-dim); font-size:9px;}
+.eedge .st{color:var(--dim); flex:none; min-width:34px; text-align:right;}
+.eedge .oid{color:var(--cyan); cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.eedge .oid:hover{color:#fff; text-shadow:0 0 6px var(--cyan); text-decoration:underline;}
+/* ------------ bottom watcher ------------ */
+#bottom{grid-area:bottom;}
+#flowlog{flex:1; overflow:auto; padding:3px 6px; font-size:10px; line-height:1.5;}
+.flow{display:flex; gap:8px; padding:0 2px; cursor:pointer; border-bottom:1px solid rgba(66,248,255,.05);}
+.flow:hover{background:rgba(255,43,214,.08);}
+.flow .ft{color:#3a5b62; flex:none;}
+.flow .fs{color:var(--cyan); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:30%;}
+.flow .fa{color:var(--dim); flex:none;}
+.flow .fd{color:var(--mag); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:30%;}
+.flow .fk{flex:none; padding:0 4px; border:1px solid var(--border-dim); font-size:9px;}
+.flow .fl{color:var(--txt); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.flow.fresh{animation:flowin .8s ease-out;}
+@keyframes flowin{ from{background:rgba(125,255,202,.22);} to{background:transparent;} }
+/* ------------ modal ------------ */
+#modal{position:fixed; inset:0; z-index:100; display:none; background:rgba(0,0,0,.72); align-items:center; justify-content:center;}
+#modal.show{display:flex;}
+#modalbox{
+  width:min(860px, 92vw); max-height:86vh; display:flex; flex-direction:column;
+  background:var(--panel2); border:1px solid var(--cyan); box-shadow:0 0 40px rgba(66,248,255,.25);
+}
+#modalhead{flex:none; display:flex; align-items:center; padding:7px 12px; border-bottom:1px solid var(--border); color:var(--cyan); letter-spacing:2px; font-size:11px; text-transform:uppercase;}
+#modalclose{margin-left:auto;}
+#modalbody{flex:1; overflow:auto; padding:10px 12px; font-size:11px;}
+#modalbody pre{font-size:10px; line-height:1.45; white-space:pre-wrap; word-break:break-word;}
+#modalbody details{border:1px solid var(--border-dim); margin-bottom:5px;}
+#modalbody summary{cursor:pointer; padding:5px 8px; color:var(--grn); letter-spacing:1px;}
+#modalbody summary:hover{background:rgba(125,255,202,.07);}
+#modalbody details pre{padding:6px 8px; border-top:1px solid var(--border-dim);}
+#modalbody table{border-collapse:collapse; width:100%; font-size:10px;}
+#modalbody th,#modalbody td{border:1px solid var(--border-dim); padding:3px 7px; text-align:left;}
+#modalbody th{color:var(--cyan); letter-spacing:1px;}
+#modalbody td.ok{color:var(--grn);} #modalbody td.bad{color:var(--red);}
+#modalbody input[type=text]{
+  width:100%; background:rgba(0,0,0,.5); border:1px solid var(--border); color:var(--grn);
+  font:inherit; font-size:11px; padding:6px 8px; outline:none;
+}
+#modalbody input[type=text]:focus{box-shadow:0 0 10px rgba(66,248,255,.3);}
+.toolrow{padding:5px 7px; border-bottom:1px solid rgba(66,248,255,.07); cursor:pointer;}
+.toolrow:hover{background:rgba(66,248,255,.07);}
+.toolrow .tn{color:var(--amb);} .toolrow .td2{color:var(--dim); font-size:10px;}
+.nlist{color:var(--cyan); cursor:pointer; display:block; padding:1px 4px;}
+.nlist:hover{color:#fff; background:rgba(66,248,255,.08);}
+.dimnote{color:var(--dim); font-size:10px; margin:4px 0;}
+</style>
+</head>
+<body>
+<div class="bggrid"></div>
+<div class="bgglow"></div>
+<div id="app">
+  <!-- ================= TOP TOOLBAR ================= -->
+  <div id="toolbar" class="panel">
+    <div class="brand">SSB&nbsp;BEAST&nbsp;<span class="b2">GODSCOPE</span></div>
+    <div class="chip">NODES <b id="c-nodes">—</b></div>
+    <div class="chip">EDGES <b id="c-edges">—</b></div>
+    <div class="chip">FRAMES <b id="c-frames">—</b></div>
+    <div class="chip">FLOWS <b id="c-flows">—</b></div>
+    <div class="chip">UPTIME <b id="c-uptime">—</b></div>
+    <div class="chip" id="c-ports" title="public / internal ports">PORT <b>—</b></div>
+    <button class="btn" id="b-god">GOD SCOPE</button>
+    <button class="btn" id="b-chain">CHAIN ALL</button>
+    <button class="btn" id="b-combo">COMBO</button>
+    <button class="btn" id="b-mcp">MCP TOOLS</button>
+    <button class="btn" id="b-msg">MESSAGES</button>
+    <button class="btn" id="b-legacy">LEGACY GUI</button>
+    <div class="ctl">SPEED <input type="range" id="speed" min="0.05" max="3" step="0.05" value="1"><span id="speedval">1.00x</span></div>
+    <button class="btn" id="b-slow" title="slow everything 10x">SLOW 10x</button>
+    <button class="btn" id="b-pause" title="freeze simulation (polling continues)">PAUSE</button>
+  </div>
+
+  <!-- ================= LEFT SIDEBAR ================= -->
+  <div id="left" class="panel">
+    <div class="sec-flex">
+      <div class="phead">KNOWLEDGE SURFACE <span class="spacer"></span><button class="btn small" id="b-treereload">RELOAD</button></div>
+      <div class="pbody" id="tree"><div class="dimnote">loading…</div></div>
+    </div>
+    <div class="sec-flex">
+      <div class="phead">ENDPOINT CATALOG <span class="spacer"></span><button class="btn small" id="b-epreload">RELOAD</button></div>
+      <div class="pbody" id="endpoints"><div class="dimnote">loading…</div></div>
+    </div>
+    <div id="syslogbox">
+      <div class="phead">SYS CONSOLE</div>
+      <div id="syslog"></div>
+    </div>
+  </div>
+
+  <!-- ================= CENTER VIEWPORT ================= -->
+  <div id="center" class="panel">
+    <div id="vizbar"></div>
+    <div id="viewport">
+      <canvas id="cv"></canvas>
+      <div id="tip"></div>
+      <div id="vizopts">
+        <span>4D&nbsp;SCAN</span>
+        <input type="range" id="fslider" min="0" max="0" step="0.01" value="0">
+        <span id="fread">t=—</span>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="fslow">SLOWED&nbsp;OBJECTS&nbsp;10x</label>
+        <div id="fmarks"></div>
+      </div>
+      <div id="whereami"><span>viz <span class="wv" id="w-viz">—</span></span><span>sel <span class="ws" id="w-sel">—</span></span><span id="w-pos"></span><span class="wf" id="w-frame"></span></div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT INSPECTOR ================= -->
+  <div id="right" class="panel">
+    <div class="phead">NODE INSPECTOR <span class="spacer"></span><span id="insp-count"></span></div>
+    <div class="pbody" style="display:flex;flex-direction:column;overflow:hidden;">
+      <div style="padding:4px 6px 0;"><span id="insp-id" class="dimnote">click a node…</span></div>
+      <pre id="nodejson">{}</pre>
+      <div class="phead" style="border-top:1px solid var(--border-dim);">EDGES TOUCHING NODE</div>
+      <div id="edgelist"><div class="dimnote" style="padding:4px;">—</div></div>
+    </div>
+  </div>
+
+  <!-- ================= BOTTOM WATCHER ================= -->
+  <div id="bottom" class="panel">
+    <div class="phead" style="border-bottom:1px solid var(--border-dim);">LIVE API
+      <span class="spacer"></span>
+      <span id="c-apicount" style="color:var(--dim);letter-spacing:1px;">0 calls</span>
+      <button class="btn small" id="b-apiclear">CLEAR</button>
+    </div>
+    <div id="apilog" style="max-height:110px; overflow-y:auto; font-size:10px; padding:2px 6px;"></div>
+    <div class="phead">WEDGE PROCESS WATCHER
+      <span class="spacer"></span>
+      <span id="c-wflows" style="color:var(--dim);letter-spacing:1px;">0 events</span>
+      <button class="btn small on" id="b-autoscroll">AUTO-SCROLL</button>
+      <button class="btn small" id="b-clearlog">CLEAR</button>
+    </div>
+    <div id="flowlog"></div>
+  </div>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div id="modal">
+  <div id="modalbox">
+    <div id="modalhead"><span id="modaltitle">—</span><button class="btn small" id="modalclose">CLOSE ✕</button></div>
+    <div id="modalbody"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ================================================================
+   SSB BEAST GODSCOPE — front-end controller
+   All API access is same-origin. Every fetch is wrapped in try/catch
+   and reports into the SYS console; the UI degrades gracefully when
+   fields are absent. Pollers: health 1s, viz-data 2s, flows 1s.
+   ================================================================ */
+
+/* ---------------- tiny DOM / format utils ---------------- */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtNum(n){ if(n==null||isNaN(n)) return '—'; n=Number(n);
+  if(Math.abs(n)>=1e6) return (n/1e6).toFixed(2)+'M';
+  if(Math.abs(n)>=1e3) return (n/1e3).toFixed(1)+'k';
+  return String(Math.round(n*100)/100); }
+function fmtUptime(s){ if(s==null||isNaN(s)) return '—'; s=Math.floor(Number(s));
+  const d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), ss=s%60;
+  return (d? d+'d ':'')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'); }
+function fmtTs(ts){ if(ts==null) return '--:--:--'; let d;
+  if(typeof ts==='number'){ d=new Date(ts>1e12?ts:ts*1000); } else { d=new Date(ts); }
+  if(isNaN(d)) return String(ts);
+  return d.toTimeString().slice(0,8)+'.'+String(d.getMilliseconds()).padStart(3,'0'); }
+function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+/* ---------------- SYS console (status area) ---------------- */
+const SYSMAX=90;
+function syslog(msg, lvl){
+  const box=$('#syslog'); if(!box) return;
+  const line=el('div');
+  line.innerHTML='<span class="t">'+fmtTs(Date.now())+'</span> <span class="'+(lvl||'inf')+'">'+esc(msg)+'</span>';
+  box.appendChild(line);
+  while(box.children.length>SYSMAX) box.removeChild(box.firstChild);
+  box.scrollTop=box.scrollHeight;
+}
+
+/* ---------------- fetch wrapper with graceful degradation ---------------- */
+async function api(path, opts){
+  try{
+    const r=await fetch(path, opts);
+    if(!r.ok){ syslog('HTTP '+r.status+' '+path, 'err'); throw new Error('HTTP '+r.status); }
+    const j=await r.json();
+    return j;
+  }catch(e){
+    syslog('fetch fail '+path+' :: '+e.message, 'err');
+    throw e;
+  }
+}
+
+/* ---------------- pretty JSON with neon syntax coloring ---------------- */
+function prettyJSON(o, indent){
+  try{
+    const raw=JSON.stringify(o, null, indent==null?2:indent);
+    if(raw==null) return 'null';
+    return esc(raw).replace(
+      /(&quot;(?:[^&]|&(?!quot;))*?&quot;)(\s*:)?|\b(true|false)\b|\bnull\b|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+      function(m, str, colon, bool, nul, num){
+        if(str) return colon? '<span class="jkey">'+str+'</span>'+colon : '<span class="jstr">'+str+'</span>';
+        if(bool) return '<span class="jbool">'+bool+'</span>';
+        if(nul)  return '<span class="jnull">null</span>';
+        return '<span class="jnum">'+num+'</span>';
+      });
+  }catch(e){ return esc(String(o)); }
+}
+
+/* ---------------- generic modal ---------------- */
+function showModal(title, bodyNode){
+  $('#modaltitle').textContent=title;
+  const body=$('#modalbody'); body.innerHTML='';
+  if(typeof bodyNode==='string') body.innerHTML=bodyNode; else if(bodyNode) body.appendChild(bodyNode);
+  $('#modal').classList.add('show');
+}
+function hideModal(){ $('#modal').classList.remove('show'); }
+$('#modalclose').addEventListener('click', hideModal);
+$('#modal').addEventListener('click', function(e){ if(e.target===this) hideModal(); });
+window.addEventListener('keydown', function(e){ if(e.key==='Escape') hideModal(); });
+function jsonModal(title, obj){
+  const pre=el('pre'); pre.innerHTML=prettyJSON(obj); showModal(title, pre);
+}
+</script>
+<script>
+'use strict';
+/* ================= GLOBAL STATE ================= */
+const S = {
+  nodes: [],            // [{id,label,kind,severity,x,y,z,...}]
+  edges: [],            // [{src,dst,kind,strength}]
+  frames: [],           // [{t, positions:{id:[x,y,z]}, events:[...]}]
+  nodeById: new Map(),
+  adj: new Map(),       // id -> [{e, other, out}]
+  version: 0,           // bumped on every viz-data refresh (invalidates layouts)
+  health: null,
+  flowsSeen: 0,
+  lastFlowTs: 0,
+  selectedId: null,
+  viz: 0,
+  speed: 1, slow10: false, paused: false,
+  flash: null,          // {src,dst,until}
+  hover: null,          // hit result for tooltip
+  screen: new Map(),    // id -> {x,y,r} rebuilt every frame for hit tests
+  cells: [],            // clickable cells for heatmap/matrix
+  view: {w: 800, h: 600, dpr: 1},
+  time: 0,              // global animation clock (seconds, pause-aware)
+};
+/* effective speed multiplier used by every moving thing */
+function speedMult(){ return S.speed * (S.slow10 ? 0.1 : 1); }
+
+/* ---------------- kind → neon color assignment (stable, first-seen order) ---------------- */
+const PALETTE = ['#42f8ff','#ff2bd6','#7dffca','#ffd447','#ff1765','#9d6bff','#ff8a3d','#4d8bff','#c0ff4d','#3dffd8','#e14dff','#ff5c33'];
+const kindColors = new Map();
+function kindColor(kind){
+  const k = kind==null ? 'unknown' : String(kind);
+  if(!kindColors.has(k)) kindColors.set(k, PALETTE[kindColors.size % PALETTE.length]);
+  return kindColors.get(k);
+}
+function sevScore(sev){ // severity → 0..1 for coloring / features
+  if(sev==null) return 0;
+  if(typeof sev==='number') return clamp(sev>1 ? sev/10 : sev, 0, 1);
+  const s=String(sev).toLowerCase();
+  if(/crit/.test(s)) return 1; if(/high/.test(s)) return .8;
+  if(/med/.test(s)) return .55; if(/low/.test(s)) return .3;
+  return .15;
+}
+function edgeKey(a,b){ return a<b ? a+'|'+b : b+'|'+a; }
+
+/* ---------------- graph ingest: normalize + rebuild indexes ---------------- */
+function ingestGraph(j){
+  if(!j || typeof j!=='object') return;
+  const nodes = Array.isArray(j.nodes) ? j.nodes : [];
+  const edges = Array.isArray(j.edges) ? j.edges : [];
+  S.nodes = nodes.map(function(n, i){
+    return {
+      id: String(n.id!=null?n.id:('n'+i)),
+      label: n.label!=null ? String(n.label) : String(n.id!=null?n.id:('n'+i)),
+      kind: n.kind!=null ? String(n.kind) : 'unknown',
+      severity: n.severity,
+      x: +n.x||0, y: +n.y||0, z: +n.z||0,
+      raw: n
+    };
+  });
+  S.edges = edges.filter(e=>e && e.src!=null && e.dst!=null).map(function(e){
+    return { src:String(e.src), dst:String(e.dst), kind:e.kind!=null?String(e.kind):'edge',
+             strength: (+e.strength)||1 };
+  });
+  S.frames = Array.isArray(j.frames) ? j.frames : [];
+  S.nodeById = new Map(S.nodes.map(n=>[n.id, n]));
+  S.adj = new Map();
+  for(const e of S.edges){
+    if(!S.adj.has(e.src)) S.adj.set(e.src, []);
+    if(!S.adj.has(e.dst)) S.adj.set(e.dst, []);
+    S.adj.get(e.src).push({e:e, other:e.dst, out:true});
+    S.adj.get(e.dst).push({e:e, other:e.src, out:false});
+  }
+  S.version++;
+  // keep layouts smooth: hand new targets to the lerp pool + frame scanner
+  POS.retarget();
+  FS.onFrames();
+  $('#c-frames').textContent = fmtNum(S.frames.length);
+}
+function degreeOf(id){ const a=S.adj.get(id); return a?a.length:0; }
+
+/* ---------------- pollers ---------------- */
+let errCounts = {};
+async function pollHealth(){
+  try{
+    const h = await api('/beast/api/health');
+    S.health = h;
+    $('#c-nodes').textContent  = fmtNum(h.nodes);
+    $('#c-edges').textContent  = fmtNum(h.edges);
+    $('#c-uptime').textContent = fmtUptime(h.uptime);
+    if(h.public_port!=null || h.internal_port!=null)
+      $('#c-ports').innerHTML = 'PORT <b>'+esc(h.public_port!=null?h.public_port:'?')+'/' +esc(h.internal_port!=null?h.internal_port:'?')+'</b>';
+    errCounts.health = 0;
+  }catch(e){ /* already logged */ }
+}
+async function pollViz(){
+  try{
+    const j = await api('/beast/api/viz-data?frames=180');
+    ingestGraph(j);
+  }catch(e){}
+}
+async function pollFlows(){
+  try{
+    const j = await api('/beast/api/process-flow?since='+encodeURIComponent(S.lastFlowTs));
+    const flows = j && Array.isArray(j.flows) ? j.flows : [];
+    if(flows.length){
+      let maxTs = S.lastFlowTs;
+      for(const f of flows){
+        addFlowRow(f, true);
+        S.flowsSeen++;
+        const t = (+f.ts)||0; if(t>maxTs) maxTs=t;
+        flowBoost(f); // particle burst + viz9 event feed
+      }
+      S.lastFlowTs = maxTs || S.lastFlowTs;
+      $('#c-flows').textContent = fmtNum(S.flowsSeen);
+      $('#c-wflows').textContent = S.flowsSeen+' events';
+    }
+  }catch(e){}
+}
+
+/* ---------------- wedge process watcher (bottom log) ---------------- */
+const FLOWMAX = 300;
+let autoScroll = true;
+function addFlowRow(f, fresh){
+  const log = $('#flowlog'); if(!log) return;
+  const row = el('div', 'flow'+(fresh?' fresh':''));
+  const kind = f.kind!=null ? String(f.kind) : 'flow';
+  row.innerHTML =
+    '<span class="ft">'+esc(fmtTs(f.ts))+'</span>'+
+    '<span class="fs" title="'+esc(f.src)+'">'+esc(f.src!=null?f.src:'?')+'</span>'+
+    '<span class="fa">→</span>'+
+    '<span class="fd" title="'+esc(f.dst)+'">'+esc(f.dst!=null?f.dst:'?')+'</span>'+
+    '<span class="fk" style="color:'+kindColor(kind)+'">'+esc(kind)+'</span>'+
+    '<span class="fl">'+esc(f.label!=null?f.label:'')+'</span>';
+  row.title = 'click to flash this edge in the current viz';
+  row.addEventListener('click', function(){
+    S.flash = {src:String(f.src), dst:String(f.dst), until: performance.now()/1000 + 2.8};
+    syslog('flash edge '+f.src+' → '+f.dst, 'warn');
+  });
+  log.insertBefore(row, log.firstChild);          // newest on top
+  while(log.children.length > FLOWMAX) log.removeChild(log.lastChild);
+  if(autoScroll) log.scrollTop = 0;
+}
+$('#b-autoscroll').addEventListener('click', function(){
+  autoScroll = !autoScroll; this.classList.toggle('on', autoScroll);
+});
+$('#b-clearlog').addEventListener('click', function(){ $('#flowlog').innerHTML=''; });
+</script>
+<script>
+'use strict';
+/* ================= LEFT: KNOWLEDGE SURFACE TREE (lazy expand) ================= */
+const treeState = new Map(); // path -> {loaded:bool, kidsEl:div}
+async function fetchKS(root){
+  return await api('/beast/api/knowledge-surface?root='+encodeURIComponent(root||''));
+}
+function treeRowIcon(type){
+  if(type==='directory' || type==='dir') return '▣';
+  if(type==='file') return '▤';
+  return '◈';
+}
+function renderDirChildren(children, container){
+  container.innerHTML='';
+  if(!Array.isArray(children) || !children.length){
+    container.appendChild(el('div','dimnote','(empty)')); return;
+  }
+  for(const c of children){
+    if(!c) continue;
+    const type = c.type || (Array.isArray(c.children)?'directory':'file');
+    const isDir = type==='directory' || type==='dir';
+    const path = c.path!=null ? String(c.path) : String(c.name||'');
+    const wrap = el('div','tree-node');
+    const row  = el('div','tree-row '+(isDir?'dir':'file'));
+    const tw   = el('span','tw', isDir ? '▸' : '·');
+    const ic   = el('span','ic', treeRowIcon(type));
+    ic.style.color = isDir ? 'var(--amb)' : 'var(--grn)';
+    const nm   = el('span','nm', String(c.name!=null?c.name:path));
+    row.appendChild(tw); row.appendChild(ic); row.appendChild(nm);
+    if(c.children && c.children.length) row.appendChild(el('span','tree-meta','('+c.children.length+')'));
+    row.title = path + (c.type? '  ['+c.type+']' : '');
+    wrap.appendChild(row);
+    let kidsEl = null;
+    const st = {loaded:false, open:false, kidsEl:null, data:c};
+    treeState.set(path, st);
+    function toggle(){
+      if(!isDir) return;
+      if(!st.loaded){
+        st.loaded = true;
+        kidsEl = el('div','tree-kids');
+        kidsEl.appendChild(el('div','dimnote','loading…'));
+        wrap.appendChild(kidsEl);
+        st.kidsEl = kidsEl;
+        // lazy: fetch this branch on first expand; render children if present
+        fetchKS(path).then(function(j){
+          const dir = j && j.directory ? j.directory : null;
+          const kids = dir && Array.isArray(dir.children) ? dir.children
+                     : (Array.isArray(c.children) ? c.children : []);
+          renderDirChildren(kids, kidsEl);
+          if(j && j.map_info) syslog('ks '+path+' :: '+JSON.stringify(j.map_info).slice(0,120), 'ok');
+          if(j && Array.isArray(j.nodes)) syslog('ks '+path+' :: '+j.nodes.length+' nodes / '+(Array.isArray(j.edges)?j.edges.length:0)+' edges', 'inf');
+        }).catch(function(){
+          // fall back to children embedded in the parent payload
+          renderDirChildren(Array.isArray(c.children)?c.children:[], kidsEl);
+        });
+        st.open = true; tw.textContent='▾';
+      } else {
+        st.open = !st.open;
+        if(st.kidsEl) st.kidsEl.style.display = st.open ? '' : 'none';
+        tw.textContent = st.open ? '▾' : '▸';
+      }
+    }
+    row.addEventListener('click', function(){
+      if(isDir){ toggle(); }
+      inspectPath(c); // always show what we know in the inspector
+      if(S.nodeById.has(path)) selectNode(path);
+      else if(S.nodeById.has(String(c.name))) selectNode(String(c.name));
+    });
+    container.appendChild(wrap);
+  }
+}
+function inspectPath(c){
+  $('#insp-id').textContent = c.path || c.name || '(node)';
+  $('#nodejson').innerHTML = prettyJSON(c);
+  const list = $('#edgelist'); list.innerHTML='';
+  const kids = Array.isArray(c.children)?c.children:[];
+  if(kids.length){
+    for(const k of kids.slice(0,400)){
+      const row=el('div','eedge');
+      row.innerHTML='<span class="ar out">▸</span><span class="kd" style="color:var(--amb)">'+esc(k.type||'child')+'</span><span class="oid">'+esc(k.name!=null?k.name:k.path)+'</span>';
+      list.appendChild(row);
+    }
+  } else list.appendChild(el('div','dimnote','no children listed'));
+  $('#insp-count').textContent = kids.length+' children';
+}
+async function loadTreeRoot(){
+  const box=$('#tree'); box.innerHTML=''; box.appendChild(el('div','dimnote','loading…'));
+  try{
+    const j = await fetchKS('');
+    box.innerHTML='';
+    const dir = j && j.directory ? j.directory : null;
+    if(dir){
+      const kids = Array.isArray(dir.children) ? dir.children : [];
+      const head = el('div','tree-row dir');
+      head.innerHTML='<span class="tw">▾</span><span class="ic" style="color:var(--amb)">▣</span><span class="nm" style="color:#fff">'+esc(dir.name||'/')+'</span>';
+      head.title = dir.path || '/';
+      head.addEventListener('click', function(){ inspectPath(dir); });
+      box.appendChild(head);
+      const kidsEl = el('div','tree-kids'); kidsEl.style.marginLeft='8px';
+      renderDirChildren(kids, kidsEl);
+      box.appendChild(kidsEl);
+    } else {
+      box.appendChild(el('div','dimnote','no directory in response'));
+      const pre=el('pre'); pre.innerHTML=prettyJSON(j); box.appendChild(pre);
+    }
+  }catch(e){
+    box.innerHTML=''; box.appendChild(el('div','dimnote','knowledge-surface unavailable'));
+  }
+}
+$('#b-treereload').addEventListener('click', loadTreeRoot);
+
+/* ================= LEFT: ENDPOINT CATALOG ================= */
+async function loadEndpoints(){
+  const box=$('#endpoints'); box.innerHTML=''; box.appendChild(el('div','dimnote','loading…'));
+  try{
+    const j = await api('/beast/api/godscope/endpoints');
+    box.innerHTML='';
+    const eps = j && Array.isArray(j.endpoints) ? j.endpoints : [];
+    if(!eps.length){ box.appendChild(el('div','dimnote','no endpoints listed')); return; }
+    for(const ep of eps){
+      if(!ep || !ep.path) continue;
+      const row=el('div','ep');
+      row.innerHTML='<span class="m">'+esc(ep.method||'GET')+'</span> <span class="p">'+esc(ep.path)+'</span>'+
+                    (ep.description? '<div class="d">'+esc(ep.description)+'</div>':'');
+      row.title=(ep.method||'GET')+' '+ep.path+(ep.description?'\n'+ep.description:'');
+      row.addEventListener('click', function(){ runEndpoint(ep); });
+      box.appendChild(row);
+    }
+  }catch(e){
+    box.innerHTML=''; box.appendChild(el('div','dimnote','endpoint catalog unavailable'));
+  }
+}
+async function runEndpoint(ep){
+  const method = String(ep.method||'GET').toUpperCase();
+  if(method==='GET'){
+    showModal('RUN '+ep.path, el('div','dimnote','running…'));
+    try{ jsonModal('GET '+ep.path, await api(ep.path)); }
+    catch(e){ showModal('GET '+ep.path, '<div class="dimnote">failed: '+esc(e.message)+'</div>'); }
+  } else {
+    const wrap=el('div');
+    wrap.innerHTML='<div class="dimnote">POST JSON arguments to '+esc(ep.path)+'</div>';
+    const ta=el('textarea'); ta.rows=6;
+    ta.style.cssText='width:100%;background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--grn);font:inherit;font-size:11px;padding:6px;';
+    ta.value='{}';
+    const run=el('button','btn','RUN POST');
+    run.style.marginTop='6px';
+    const out=el('pre');
+    run.addEventListener('click', async function(){
+      let body; try{ body=JSON.parse(ta.value||'{}'); }catch(e){ out.textContent='bad JSON: '+e.message; return; }
+      out.textContent='running…';
+      try{ out.innerHTML=prettyJSON(await api(ep.path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})); }
+      catch(e){ out.textContent='failed: '+e.message; }
+    });
+    wrap.appendChild(ta); wrap.appendChild(run); wrap.appendChild(out);
+    showModal('POST '+ep.path, wrap);
+  }
+}
+$('#b-epreload').addEventListener('click', loadEndpoints);
+
+/* ================= RIGHT: NODE INSPECTOR ================= */
+async function selectNode(id){
+  id = String(id);
+  S.selectedId = id;
+  $('#insp-id').textContent = id;
+  const list=$('#edgelist'); list.innerHTML='';
+  let nodeJson=null, edges=null, wiki=null;
+  try{
+    const j = await api('/beast/api/node?id='+encodeURIComponent(id));
+    nodeJson = j && j.node ? j.node : null;
+    edges = j && Array.isArray(j.edges) ? j.edges : null;
+    wiki = j && j.wiki!=null ? j.wiki : null;
+  }catch(e){ /* degrade to local graph data below */ }
+  if(!nodeJson){
+    const ln = S.nodeById.get(id);
+    nodeJson = ln ? ln.raw : {id:id, note:'not present in current viz-data'};
+  }
+  $('#nodejson').innerHTML = prettyJSON(nodeJson) + (wiki!=null ? '\n\n<span class="jkey">"wiki":</span> <span class="jstr">'+esc(typeof wiki==='string'?wiki:JSON.stringify(wiki))+'</span>' : '');
+  if(!edges){ // synthesize the complete touching-edge list from local adjacency
+    edges = (S.adj.get(id)||[]).map(function(a){ return a.e; });
+  }
+  $('#insp-count').textContent = edges.length+' edges';
+  if(!edges.length){ list.appendChild(el('div','dimnote','no edges touch this node')); return; }
+  for(const e of edges){
+    if(!e) continue;
+    const out = String(e.src)===id;
+    const other = out ? String(e.dst) : String(e.src);
+    const row=el('div','eedge');
+    row.innerHTML =
+      '<span class="ar '+(out?'out':'in')+'">'+(out?'→':'←')+'</span>'+
+      '<span class="kd" style="color:'+kindColor(e.kind)+'">'+esc(e.kind!=null?e.kind:'edge')+'</span>'+
+      '<span class="st">'+esc(fmtNum(e.strength!=null?e.strength:1))+'</span>'+
+      '<span class="oid" title="inspect '+esc(other)+'">'+esc(other)+'</span>';
+    row.querySelector('.oid').addEventListener('click', function(ev){ ev.stopPropagation(); selectNode(other); });
+    row.addEventListener('click', function(){ S.flash={src:String(e.src), dst:String(e.dst), until:performance.now()/1000+2.8}; });
+    list.appendChild(row);
+  }
+}
+</script>
+<script>
+'use strict';
+/* ================= TOOLBAR: GOD SCOPE / CHAIN ALL / COMBO / MCP / LEGACY ================= */
+$('#b-god').addEventListener('click', async function(){
+  showModal('GOD SCOPE', '<div class="dimnote">running full godscope sweep (this endpoint is slow)…</div>');
+  syslog('godscope sweep started', 'warn');
+  try{
+    const j = await api('/beast/api/godscope');
+    syslog('godscope done in '+(j.elapsed!=null?fmtNum(j.elapsed)+'s':'?'), 'ok');
+    const wrap=el('div');
+    const tot = j && j.totals ? j.totals : {};
+    wrap.innerHTML='<div class="dimnote">totals — nodes: <b style="color:var(--cyan)">'+esc(fmtNum(tot.nodes))+'</b> · edges: <b style="color:var(--cyan)">'+esc(fmtNum(tot.edges))+'</b> · elapsed: <b style="color:var(--amb)">'+esc(j.elapsed!=null?fmtNum(j.elapsed)+'s':'—')+'</b></div>';
+    const secs = j && j.sections && typeof j.sections==='object' ? j.sections : {};
+    const keys = Object.keys(secs);
+    if(!keys.length) wrap.appendChild(el('div','dimnote','no sections in response'));
+    for(const k of keys){
+      const det=el('details'); const sum=el('summary',null,k);
+      const pre=el('pre'); pre.innerHTML=prettyJSON(secs[k]);
+      det.appendChild(sum); det.appendChild(pre); wrap.appendChild(det);
+    }
+    showModal('GOD SCOPE REPORT', wrap);
+  }catch(e){
+    showModal('GOD SCOPE', '<div class="dimnote">godscope failed: '+esc(e.message)+'</div>');
+  }
+});
+$('#b-chain').addEventListener('click', async function(){
+  showModal('CHAIN ALL', '<div class="dimnote">chaining every command…</div>');
+  try{
+    const j = await api('/beast/api/chain-all');
+    const wrap=el('div');
+    const steps = j && Array.isArray(j.steps) ? j.steps : [];
+    if(!steps.length){ wrap.innerHTML='<div class="dimnote">no steps returned</div>'; }
+    else{
+      const tbl=el('table');
+      tbl.innerHTML='<tr><th>STEP</th><th>OK</th><th>NODES</th><th>EDGES</th><th>ELAPSED</th></tr>';
+      for(const st of steps){
+        const tr=el('tr');
+        tr.innerHTML='<td>'+esc(st.step!=null?st.step:'?')+'</td>'+
+          '<td class="'+(st.ok?'ok':'bad')+'">'+(st.ok?'✔':'✘')+'</td>'+
+          '<td>'+esc(fmtNum(st.nodes))+'</td><td>'+esc(fmtNum(st.edges))+'</td>'+
+          '<td>'+esc(st.elapsed!=null?fmtNum(st.elapsed)+'s':'—')+'</td>';
+        tbl.appendChild(tr);
+      }
+      wrap.appendChild(tbl);
+    }
+    if(j && j.totals) wrap.appendChild(el('div','dimnote','totals: '+JSON.stringify(j.totals)));
+    showModal('CHAIN ALL REPORT', wrap);
+  }catch(e){
+    showModal('CHAIN ALL', '<div class="dimnote">chain-all failed: '+esc(e.message)+'</div>');
+  }
+});
+$('#b-combo').addEventListener('click', function(){
+  const wrap=el('div');
+  wrap.innerHTML='<div class="dimnote">combo engine: normal + broad + kernel fire together, results merged &amp; deduped.</div>';
+  const inp=el('input'); inp.type='text'; inp.placeholder='command e.g. scan:deep';
+  const run=el('button','btn','RUN COMBO'); run.style.margin='6px 0';
+  const out=el('pre');
+  async function go(){
+    const cmd=inp.value.trim(); if(!cmd){ out.textContent='enter a command first'; return; }
+    out.textContent='combo firing: '+cmd+' …';
+    try{ out.innerHTML=prettyJSON(await api('/beast/api/combo?command='+encodeURIComponent(cmd))); }
+    catch(e){ out.textContent='combo failed: '+e.message; }
+  }
+  run.addEventListener('click', go);
+  inp.addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
+  wrap.appendChild(inp); wrap.appendChild(run); wrap.appendChild(out);
+  showModal('COMBO ENGINE', wrap);
+  setTimeout(function(){ inp.focus(); }, 50);
+});
+$('#b-mcp').addEventListener('click', async function(){
+  showModal('MCP TOOLS', '<div class="dimnote">listing tools…</div>');
+  try{
+    const j = await api('/beast/api/mcp/tools/list');
+    const tools = j && Array.isArray(j.tools) ? j.tools : [];
+    const wrap=el('div');
+    if(!tools.length) wrap.innerHTML='<div class="dimnote">no tools advertised</div>';
+    for(const t of tools){
+      if(!t || !t.name) continue;
+      const row=el('div','toolrow');
+      row.innerHTML='<div class="tn">⚙ '+esc(t.name)+'</div>'+(t.description?'<div class="td2">'+esc(t.description)+'</div>':'');
+      row.addEventListener('click', function(){ mcpCallForm(t); });
+      wrap.appendChild(row);
+    }
+    showModal('MCP TOOLS ('+tools.length+')', wrap);
+  }catch(e){
+    showModal('MCP TOOLS', '<div class="dimnote">tools/list failed: '+esc(e.message)+'</div>');
+  }
+});
+function mcpCallForm(tool){
+  const wrap=el('div');
+  wrap.innerHTML='<div class="dimnote">call <b style="color:var(--amb)">'+esc(tool.name)+'</b>'+(tool.description?' — '+esc(tool.description):'')+'</div>';
+  // build an arguments skeleton from inputSchema properties when available
+  let skel={};
+  try{
+    const props = tool.inputSchema && tool.inputSchema.properties ? tool.inputSchema.properties : {};
+    for(const k of Object.keys(props)){
+      const p=props[k]||{};
+      skel[k] = p.default!=null ? p.default : (p.type==='number'||p.type==='integer' ? 0 : p.type==='boolean' ? false : p.type==='array' ? [] : p.type==='object' ? {} : '');
+    }
+  }catch(e){}
+  const ta=el('textarea'); ta.rows=8;
+  ta.style.cssText='width:100%;background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--grn);font:inherit;font-size:11px;padding:6px;';
+  ta.value=JSON.stringify(skel,null,2);
+  const call=el('button','btn','CALL TOOL'); call.style.margin='6px 0';
+  const out=el('pre'); out.textContent='— result —';
+  call.addEventListener('click', async function(){
+    let args; try{ args=JSON.parse(ta.value||'{}'); }catch(e){ out.textContent='bad arguments JSON: '+e.message; return; }
+    out.textContent='calling…';
+    try{
+      const j = await api('/beast/api/mcp/tools/call', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:tool.name, arguments:args})});
+      // MCP envelope: {content:[{type:'text',text}]} — unwrap text and re-parse when possible
+      let shown=j;
+      try{
+        if(j && Array.isArray(j.content) && j.content.length && j.content[0].type==='text'){
+          const txt=j.content[0].text;
+          try{ shown=JSON.parse(txt); }catch(e2){ shown=txt; }
+        }
+      }catch(e3){}
+      out.innerHTML = typeof shown==='string' ? esc(shown) : prettyJSON(shown);
+    }catch(e){ out.textContent='call failed: '+e.message; }
+  });
+  const schemaPre=el('pre'); schemaPre.innerHTML='<span class="jkey">inputSchema:</span> '+prettyJSON(tool.inputSchema||{});
+  wrap.appendChild(schemaPre); wrap.appendChild(ta); wrap.appendChild(call); wrap.appendChild(out);
+  showModal('MCP CALL: '+tool.name, wrap);
+}
+$('#b-legacy').addEventListener('click', async function(){
+  // legacy GUI is proxied on the same origin; open in a new tab, with fallbacks
+  let ok=false;
+  try{
+    const r=await fetch('/legacy', {method:'HEAD'});
+    ok=r.ok;
+  }catch(e){ ok=false; }
+  if(ok){ window.open('/legacy','_blank'); syslog('legacy GUI opened in new tab','ok'); return; }
+  // fallback: give the user a link list anchored at /api/state
+  const wrap=el('div');
+  wrap.innerHTML='<div class="dimnote">/legacy did not answer — falling back to legacy API links (same origin proxy):</div>';
+  const links=['/api/state','/api/nodes','/api/edges','/api/health','/'];
+  for(const L of links){
+    const a=el('a','nlist',L); a.href=L; a.target='_blank'; a.style.color='var(--grn)';
+    wrap.appendChild(a);
+  }
+  try{ jsonModalLinks(wrap, await api('/api/state')); }catch(e){ showModal('LEGACY GUI (fallback)', wrap); }
+});
+function jsonModalLinks(wrap, state){
+  const pre=el('pre'); pre.innerHTML='<span class="jkey">/api/state:</span> '+prettyJSON(state);
+  wrap.appendChild(pre);
+  showModal('LEGACY GUI (fallback)', wrap);
+}
+
+/* ================= TOOLBAR: SPEED / SLOW / PAUSE ================= */
+$('#speed').addEventListener('input', function(){
+  S.speed=parseFloat(this.value)||1;
+  $('#speedval').textContent=S.speed.toFixed(2)+'x';
+});
+$('#b-slow').addEventListener('click', function(){
+  S.slow10=!S.slow10; this.classList.toggle('on', S.slow10);
+  syslog('slow-10x '+(S.slow10?'engaged':'released'),'warn');
+});
+$('#b-pause').addEventListener('click', function(){
+  S.paused=!S.paused; this.classList.toggle('on', S.paused); this.textContent=S.paused?'RESUME':'PAUSE';
+  syslog(S.paused?'simulation paused (polling continues)':'simulation resumed','warn');
+});
+window.addEventListener('keydown', function(e){
+  if(e.code==='Space' && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')){
+    e.preventDefault(); $('#b-pause').click();
+  }
+});
+</script>
+<script>
+'use strict';
+/* ================= RENDER CORE ================= */
+const cv = $('#cv');
+const ctx = cv.getContext('2d');
+function resizeCanvas(){
+  const vp=$('#viewport'); const r=vp.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  S.view={w:Math.max(50,r.width), h:Math.max(50,r.height), dpr:dpr};
+  cv.width=Math.round(S.view.w*dpr); cv.height=Math.round(S.view.h*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+new ResizeObserver(resizeCanvas).observe($('#viewport'));
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+/* ---------------- glow sprite cache (fast additive-ish glow dots) ---------------- */
+const spriteCache = new Map();
+function glowSprite(color){
+  if(spriteCache.has(color)) return spriteCache.get(color);
+  const c=document.createElement('canvas'); c.width=c.height=64;
+  const g=c.getContext('2d');
+  const grad=g.createRadialGradient(32,32,0,32,32,32);
+  grad.addColorStop(0,'rgba(255,255,255,0.95)');
+  grad.addColorStop(0.18,color);
+  grad.addColorStop(0.5,hexA(color,0.28));
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=grad; g.fillRect(0,0,64,64);
+  spriteCache.set(color,c);
+  return c;
+}
+function hexA(hex, a){ // '#rrggbb' -> rgba string
+  const h=hex.replace('#','');
+  const r=parseInt(h.substr(0,2),16), g=parseInt(h.substr(2,2),16), b=parseInt(h.substr(4,2),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+function drawGlow(x,y,r,color,alpha){
+  ctx.globalAlpha = alpha==null?1:alpha;
+  ctx.drawImage(glowSprite(color), x-r*2, y-r*2, r*4, r*4);
+  ctx.globalAlpha = 1;
+}
+
+/* ---------------- smooth position lerp pool (data refresh morphing) ---------------- */
+function LerpPool(){ this.cur=new Map(); this.tgt=new Map(); }
+LerpPool.prototype.setTargets=function(map, snap){
+  this.tgt=map;
+  for(const pair of map){ const id=pair[0], p=pair[1];
+    if(!this.cur.has(id)) this.cur.set(id, snap ? p.slice() : [p[0]*0.2, p[1]*0.2, p[2]*0.2]);
+  }
+  for(const id of Array.from(this.cur.keys())) if(!map.has(id)) this.cur.delete(id);
+};
+LerpPool.prototype.tick=function(dt){
+  const k=1-Math.exp(-dt*6.5);
+  for(const pair of this.cur){ const id=pair[0], p=pair[1]; const t=this.tgt.get(id); if(!t) continue;
+    p[0]+=(t[0]-p[0])*k; p[1]+=(t[1]-p[1])*k; p[2]+=(t[2]-p[2])*k; }
+};
+LerpPool.prototype.get=function(id){ return this.cur.get(id)||this.tgt.get(id)||null; };
+
+/* default world positions straight from viz-data x,y,z (used by field/seed) */
+const POS = new LerpPool();
+POS.retarget = function(){
+  const m=new Map();
+  for(const n of S.nodes) m.set(n.id, [n.x, n.y, n.z]);
+  this.setTargets(m, false);
+};
+
+/* ---------------- edge index for flow boosts ---------------- */
+function edgeIndexOf(src,dst){
+  for(let i=0;i<S.edges.length;i++){ const e=S.edges[i];
+    if((e.src===src&&e.dst===dst)||(e.src===dst&&e.dst===src)) return i; }
+  return -1;
+}
+
+/* ---------------- shared particle system: motes travel src→dst along edges ---------------- */
+const PS = {
+  parts: [],            // {e, t, sp, sz, hot}
+  boosts: new Map(),    // edgeIdx -> until (S.time)
+  spawnTarget: function(e){
+    let t = 1 + ((e.strength||1) >= 1.5 ? 1 : 0) + (S.edges.length < 220 ? 1 : 0);
+    return Math.min(4, t);
+  },
+  update: function(dt){
+    const m = speedMult();
+    const edges = S.edges;
+    // advance + wrap
+    for(let i=0;i<this.parts.length;i++){
+      const p=this.parts[i];
+      p.t += dt * p.sp * m;
+      if(p.t>1){ if(p.hot){ this.parts.splice(i,1); i--; } else p.t-=1; }
+    }
+    // purge particles pointing at dead edges
+    if(this.parts.length && edges.length===0) this.parts.length=0;
+    // spawn pass (bounded for perf)
+    const cap = 900;
+    if(!edges.length) return;
+    const counts = new Map();
+    for(const p of this.parts) counts.set(p.e, (counts.get(p.e)||0)+1);
+    const maxEdgeScan = Math.min(edges.length, 1500);
+    for(let i=0;i<maxEdgeScan && this.parts.length<cap;i++){
+      const e=edges[i];
+      let want=this.spawnTarget(e);
+      const boostUntil=this.boosts.get(i);
+      const hot = boostUntil!=null && S.time<boostUntil;
+      if(hot) want+=3;
+      let have=counts.get(i)||0;
+      while(have<want && this.parts.length<cap){
+        this.parts.push({ e:i, t:Math.random(), sp:(0.10+0.22*((e.strength||1))) * (0.7+Math.random()*0.6), sz:hot?2.6:1.7, hot:false });
+        have++;
+      }
+      if(hot){ // burst: inject fresh hot particles at t=0 that die at the end
+        for(let b=0;b<2 && this.parts.length<cap;b++)
+          this.parts.push({ e:i, t:Math.random()*0.15, sp:0.5+Math.random()*0.4, sz:3.2, hot:true });
+        this.boosts.delete(i);
+      }
+    }
+  }
+};
+function flowBoost(f){
+  if(!f) return;
+  const i = edgeIndexOf(String(f.src), String(f.dst));
+  if(i>=0) PS.boosts.set(i, S.time+1.6);
+  FS.onEvent(f); // feed 4D scanner live events too
+}
+
+/* ---------------- flash (click a flow / edge → highlight in current viz) ---------------- */
+function flashActive(){ return S.flash && performance.now()/1000 < S.flash.until; }
+function isFlashEdge(e){
+  if(!flashActive()) return false;
+  const f=S.flash;
+  return (e.src===f.src&&e.dst===f.dst)||(e.src===f.dst&&e.dst===f.src);
+}
+function drawFlash(viz){
+  if(!flashActive()) return;
+  const now=performance.now()/1000;
+  const k=(S.flash.until-now)/2.8; // 1 → 0 fade
+  for(const e of S.edges){
+    if(!isFlashEdge(e)) continue;
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,'+(0.85*k)+')';
+    ctx.lineWidth=2.4;
+    ctx.shadowColor='#ffffff'; ctx.shadowBlur=14*k;
+    ctx.beginPath();
+    const STEPS=22;
+    for(let s=0;s<=STEPS;s++){
+      const pt=viz.edgePoint(e, s/STEPS);
+      if(!pt) continue;
+      if(s===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]);
+    }
+    ctx.stroke();
+    // bright head sweeping along the edge
+    const ht=(now*1.4)%1;
+    const hp=viz.edgePoint(e, ht);
+    if(hp) drawGlow(hp[0],hp[1],7,'#ffffff',0.9*k);
+    ctx.restore();
+  }
+}
+
+/* ---------------- shared draw: edges / particles / nodes / legend / readout ---------------- */
+function drawEdgesDefault(viz){
+  ctx.lineWidth=1;
+  for(const e of S.edges){
+    const a=viz.worldPos(e.src), b=viz.worldPos(e.dst);
+    if(!a||!b) continue;
+    const pa=viz.project(a[0],a[1],a[2]), pb=viz.project(b[0],b[1],b[2]);
+    if(!pa||!pb) continue;
+    const col=kindColor(e.kind);
+    ctx.strokeStyle=hexA(col, 0.10+0.10*Math.min(2,(e.strength||1))/2);
+    ctx.beginPath(); ctx.moveTo(pa[0],pa[1]); ctx.lineTo(pb[0],pb[1]); ctx.stroke();
+  }
+}
+function straightEdgePoint(viz, e, t){
+  const a=viz.worldPos(e.src), b=viz.worldPos(e.dst);
+  if(!a||!b) return null;
+  return viz.project(lerp(a[0],b[0],t), lerp(a[1],b[1],t), lerp(a[2],b[2],t));
+}
+function drawParticles(viz){
+  const big = S.nodes.length<=1500;
+  for(const p of PS.parts){
+    const e=S.edges[p.e]; if(!e) continue;
+    const pt=viz.edgePoint(e, p.t);
+    if(!pt) continue;
+    const col = p.hot ? '#ffffff' : kindColor(e.kind);
+    const sc = pt[2]||1, al = pt[3]==null?1:pt[3];
+    if(big) drawGlow(pt[0], pt[1], p.sz*sc, col, 0.75*al);
+    else { ctx.fillStyle=hexA(col,0.8*al); ctx.fillRect(pt[0]-1,pt[1]-1,2,2); }
+  }
+}
+function drawNodesDefault(viz){
+  const big = S.nodes.length<=1500;
+  for(const n of S.nodes){
+    const w=viz.worldPos(n.id); if(!w) continue;
+    const pt=viz.project(w[0],w[1],w[2]); if(!pt) continue;
+    const sx=pt[0], sy=pt[1], sc=pt[2]||1, al=pt[3]==null?1:pt[3];
+    if(sx<-40||sy<-40||sx>S.view.w+40||sy>S.view.h+40) continue;
+    const deg=degreeOf(n.id);
+    const r=clamp((3.1+deg*0.22)*sc, 1.6, 16);
+    const col=kindColor(n.kind);
+    if(big) drawGlow(sx, sy, r*1.6, col, 0.8*al);
+    ctx.fillStyle=hexA(col, 0.95*al);
+    ctx.beginPath(); ctx.arc(sx, sy, r*0.45, 0, Math.PI*2); ctx.fill();
+    const sv=sevScore(n.severity);
+    if(sv>=0.55){ // severity ring
+      ctx.strokeStyle=hexA('#ff1765', 0.35+0.55*sv); ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.arc(sx, sy, r*0.45+2.5, -Math.PI/2, -Math.PI/2+Math.PI*2*sv); ctx.stroke();
+    }
+    if(n.id===S.selectedId){
+      ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.arc(sx, sy, r+5+Math.sin(S.time*5)*1.5, 0, Math.PI*2); ctx.stroke();
+      ctx.strokeStyle='rgba(66,248,255,0.35)';
+      ctx.beginPath(); ctx.moveTo(sx-14,sy); ctx.lineTo(sx+14,sy); ctx.moveTo(sx,sy-14); ctx.lineTo(sx,sy+14); ctx.stroke();
+    }
+    S.screen.set(n.id, {x:sx, y:sy, r:Math.max(r,7)});
+  }
+}
+function drawLegend(){
+  const counts=new Map();
+  for(const n of S.nodes) counts.set(n.kind,(counts.get(n.kind)||0)+1);
+  const kinds=Array.from(counts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if(!kinds.length) return;
+  const w=150, h=14+kinds.length*14;
+  ctx.fillStyle='rgba(2,10,14,.72)'; ctx.fillRect(8,8,w,h);
+  ctx.strokeStyle='rgba(66,248,255,.25)'; ctx.strokeRect(8.5,8.5,w,h);
+  ctx.font='10px "Courier New",monospace'; ctx.textBaseline='middle';
+  let y=16;
+  for(const kv of kinds){
+    ctx.fillStyle=kindColor(kv[0]); ctx.fillRect(14,y-3,7,7);
+    ctx.fillStyle='rgba(191,233,238,.85)';
+    ctx.fillText(kv[0].slice(0,14)+' '+kv[1], 26, y);
+    y+=14;
+  }
+}
+let readoutLast=0;
+function updateReadout(viz){
+  const now=performance.now();
+  if(now-readoutLast<200) return; readoutLast=now;
+  $('#w-viz').textContent=viz.name;
+  const sel=S.selectedId;
+  $('#w-sel').textContent=sel||'—';
+  let pos='';
+  if(sel && viz.worldPos){
+    const w=viz.worldPos(sel);
+    if(w) pos='@ ('+w[0].toFixed(1)+', '+w[1].toFixed(1)+', '+(w[2]||0).toFixed(1)+')';
+  }
+  $('#w-pos').innerHTML='<span class="wv">'+esc(pos)+'</span>';
+  $('#w-frame').textContent = viz.frameReadout ? viz.frameReadout() : '';
+}
+function hitTestNodes(x,y){
+  let best=null, bd=1e9;
+  for(const pair of S.screen){
+    const id=pair[0], p=pair[1];
+    const d=Math.hypot(p.x-x,p.y-y);
+    if(d<p.r+4 && d<bd){ bd=d; best={type:'node', id:id}; }
+  }
+  return best;
+}
+</script>
+<script>
+'use strict';
+/* ================= VIZ 1: 2D FORCE ================= */
+function makeForce2D(){
+  const pos=new Map(), vel=new Map();
+  let zoom=1, dragId=null, fit={cx:0,cy:0,sc:1};
+  function sync(){
+    for(const n of S.nodes) if(!pos.has(n.id)){
+      pos.set(n.id,[n.x+(Math.random()*60-30), n.y+(Math.random()*60-30)]);
+      vel.set(n.id,[0,0]);
+    }
+    const ids=new Set(S.nodes.map(n=>n.id));
+    for(const id of Array.from(pos.keys())) if(!ids.has(id)){ pos.delete(id); vel.delete(id); }
+  }
+  function tick(dt){
+    sync();
+    if(S.paused) return;
+    const dt60=clamp(dt*60*speedMult(),0,3); if(dt60<=0) return;
+    const nodes=S.nodes, N=Math.min(nodes.length,700);
+    const REP=3400, REST=95, K=0.016, CEN=0.005;
+    for(let i=0;i<N;i++){
+      const pi=pos.get(nodes[i].id); if(!pi) continue;
+      for(let j=i+1;j<N;j++){
+        const pj=pos.get(nodes[j].id); if(!pj) continue;
+        let dx=pi[0]-pj[0], dy=pi[1]-pj[1];
+        const d2=dx*dx+dy*dy+0.05;
+        if(d2>400000) continue;
+        const d=Math.sqrt(d2), f=Math.min(REP/d2,9);
+        dx/=d; dy/=d;
+        const vi=vel.get(nodes[i].id), vj=vel.get(nodes[j].id);
+        vi[0]+=dx*f*dt60; vi[1]+=dy*f*dt60;
+        vj[0]-=dx*f*dt60; vj[1]-=dy*f*dt60;
+      }
+    }
+    for(const e of S.edges){
+      const a=pos.get(e.src), b=pos.get(e.dst); if(!a||!b) continue;
+      let dx=b[0]-a[0], dy=b[1]-a[1];
+      const d=Math.sqrt(dx*dx+dy*dy)||0.1;
+      const f=(d-REST)*K*(0.4+Math.min(3,(e.strength||1))*0.6);
+      dx/=d; dy/=d;
+      const va=vel.get(e.src), vb=vel.get(e.dst);
+      if(va){ va[0]+=dx*f*dt60; va[1]+=dy*f*dt60; }
+      if(vb){ vb[0]-=dx*f*dt60; vb[1]-=dy*f*dt60; }
+    }
+    for(let i=0;i<N;i++){
+      const id=nodes[i].id, p=pos.get(id), v=vel.get(id); if(!p||!v) continue;
+      if(id===dragId){ v[0]=0; v[1]=0; continue; }
+      v[0]+=(0-p[0])*CEN*dt60; v[1]+=(0-p[1])*CEN*dt60;
+      v[0]*=0.85; v[1]*=0.85;
+      const sp=Math.hypot(v[0],v[1]);
+      if(sp>14){ v[0]*=14/sp; v[1]*=14/sp; }
+      p[0]+=v[0]*dt60; p[1]+=v[1]*dt60;
+    }
+  }
+  function computeFit(){
+    let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,c=0;
+    for(const p of pos.values()){ c++;
+      if(p[0]<minx)minx=p[0]; if(p[0]>maxx)maxx=p[0];
+      if(p[1]<miny)miny=p[1]; if(p[1]>maxy)maxy=p[1]; }
+    if(!c){ fit={cx:0,cy:0,sc:1}; return; }
+    const w=Math.max(80,maxx-minx), h=Math.max(80,maxy-miny);
+    fit={cx:(minx+maxx)/2, cy:(miny+maxy)/2, sc:Math.min((S.view.w-130)/w,(S.view.h-130)/h)};
+  }
+  const viz={
+    name:'2D FORCE',
+    prepare:function(dt){ tick(dt); computeFit(); },
+    worldPos:function(id){ const p=pos.get(id); return p?[p[0],p[1],0]:null; },
+    project:function(x,y){
+      const sc=fit.sc*zoom;
+      return [S.view.w/2+(x-fit.cx)*sc, S.view.h/2+(y-fit.cy)*sc, clamp(sc*1.5,0.4,2.4), 1];
+    },
+    edgePoint:function(e,t){ return straightEdgePoint(viz,e,t); },
+    onDown:function(x,y){ const h=hitTestNodes(x,y); if(h){ dragId=h.id; return true; } return false; },
+    onMove:function(x,y,dx,dy){ if(dragId&&pos.has(dragId)){ const sc=fit.sc*zoom||1; const p=pos.get(dragId); p[0]+=dx/sc; p[1]+=dy/sc; } },
+    onUp:function(){ dragId=null; },
+    onWheel:function(d){ zoom=clamp(zoom*(d>0?0.9:1.12),0.2,6); }
+  };
+  return viz;
+}
+
+/* ================= VIZ 2: 3D FORCE ================= */
+function makeForce3D(){
+  const pos=new Map(), vel=new Map();
+  let zoom=1, yaw=0.6, pitch=0.35, dragging=false, R=300;
+  function sync(){
+    for(const n of S.nodes) if(!pos.has(n.id)){
+      pos.set(n.id,[n.x+(Math.random()*60-30), n.y+(Math.random()*60-30), n.z+(Math.random()*60-30)]);
+      vel.set(n.id,[0,0,0]);
+    }
+    const ids=new Set(S.nodes.map(n=>n.id));
+    for(const id of Array.from(pos.keys())) if(!ids.has(id)){ pos.delete(id); vel.delete(id); }
+  }
+  function tick(dt){
+    sync();
+    if(S.paused) return;
+    if(!dragging) yaw += dt*0.12*speedMult();   // idle auto-rotate
+    const dt60=clamp(dt*60*speedMult(),0,3); if(dt60<=0) return;
+    const nodes=S.nodes, N=Math.min(nodes.length,600);
+    const REP=5200, REST=110, K=0.014, CEN=0.005;
+    for(let i=0;i<N;i++){
+      const pi=pos.get(nodes[i].id); if(!pi) continue;
+      for(let j=i+1;j<N;j++){
+        const pj=pos.get(nodes[j].id); if(!pj) continue;
+        let dx=pi[0]-pj[0], dy=pi[1]-pj[1], dz=pi[2]-pj[2];
+        const d2=dx*dx+dy*dy+dz*dz+0.05;
+        if(d2>640000) continue;
+        const d=Math.sqrt(d2), f=Math.min(REP/d2,9);
+        dx/=d; dy/=d; dz/=d;
+        const vi=vel.get(nodes[i].id), vj=vel.get(nodes[j].id);
+        vi[0]+=dx*f*dt60; vi[1]+=dy*f*dt60; vi[2]+=dz*f*dt60;
+        vj[0]-=dx*f*dt60; vj[1]-=dy*f*dt60; vj[2]-=dz*f*dt60;
+      }
+    }
+    for(const e of S.edges){
+      const a=pos.get(e.src), b=pos.get(e.dst); if(!a||!b) continue;
+      let dx=b[0]-a[0], dy=b[1]-a[1], dz=b[2]-a[2];
+      const d=Math.sqrt(dx*dx+dy*dy+dz*dz)||0.1;
+      const f=(d-REST)*K*(0.4+Math.min(3,(e.strength||1))*0.6);
+      dx/=d; dy/=d; dz/=d;
+      const va=vel.get(e.src), vb=vel.get(e.dst);
+      if(va){ va[0]+=dx*f*dt60; va[1]+=dy*f*dt60; va[2]+=dz*f*dt60; }
+      if(vb){ vb[0]-=dx*f*dt60; vb[1]-=dy*f*dt60; vb[2]-=dz*f*dt60; }
+    }
+    for(let i=0;i<N;i++){
+      const id=nodes[i].id, p=pos.get(id), v=vel.get(id); if(!p||!v) continue;
+      v[0]+=(0-p[0])*CEN*dt60; v[1]+=(0-p[1])*CEN*dt60; v[2]+=(0-p[2])*CEN*dt60;
+      v[0]*=0.85; v[1]*=0.85; v[2]*=0.85;
+      const sp=Math.hypot(v[0],v[1],v[2]);
+      if(sp>16){ v[0]*=16/sp; v[1]*=16/sp; v[2]*=16/sp; }
+      p[0]+=v[0]*dt60; p[1]+=v[1]*dt60; p[2]+=v[2]*dt60;
+    }
+  }
+  function computeR(){
+    let m=1;
+    for(const p of pos.values()){ const d=Math.hypot(p[0],p[1],p[2]); if(d>m) m=d; }
+    R=m;
+  }
+  const viz={
+    name:'3D FORCE',
+    prepare:function(dt){ tick(dt); computeR(); },
+    worldPos:function(id){ const p=pos.get(id); return p?[p[0],p[1],p[2]]:null; },
+    project:function(x,y,z){
+      const base=(Math.min(S.view.w,S.view.h)/2.35)/Math.max(R,1)*zoom;
+      const cy=Math.cos(yaw), sy=Math.sin(yaw), cp=Math.cos(pitch), sp=Math.sin(pitch);
+      const x1=x*cy+z*sy, z1=-x*sy+z*cy;
+      const y1=y*cp-z1*sp, z2=y*sp+z1*cp;
+      const fov=3.1; const s=fov/(fov+z2*base/140); // perspective divide
+      const sx=S.view.w/2 + x1*base*s*0.9;
+      const sy2=S.view.h/2 + y1*base*s*0.9;
+      const depth=clamp(1.15 - (z2*base/140+2.2)/4.4, 0.15, 1);
+      return [sx, sy2, clamp(s,0.25,2.6), depth];
+    },
+    edgePoint:function(e,t){ return straightEdgePoint(viz,e,t); },
+    onDown:function(){ dragging=true; return true; },
+    onMove:function(x,y,dx,dy){ if(dragging){ yaw+=dx*0.006; pitch=clamp(pitch+dy*0.006,-1.45,1.45); } },
+    onUp:function(){ dragging=false; },
+    onWheel:function(d){ zoom=clamp(zoom*(d>0?0.9:1.12),0.25,5); }
+  };
+  return viz;
+}
+
+/* ================= VIZ 3: RADIAL TREE ================= */
+function makeRadial(){
+  const pool=new LerpPool(); let ver=-1, root=null, fit={sc:1,R:1};
+  function layout(){
+    ver=S.version;
+    const adj=S.adj, byId=S.nodeById, out=new Map();
+    root = byId.has('brain:core') ? 'brain:core' : null;
+    if(root==null){ let bd=-1; for(const n of S.nodes){ const d=degreeOf(n.id); if(d>bd){ bd=d; root=n.id; } } }
+    const depth=new Map(), children=new Map();
+    if(root!=null){
+      const q=[root]; depth.set(root,0);
+      while(q.length){
+        const id=q.shift(); const d=depth.get(id);
+        if(d>=14) continue; // depth guard
+        for(const a of (adj.get(id)||[])){
+          if(!depth.has(a.other)){
+            depth.set(a.other,d+1);
+            if(!children.has(id)) children.set(id,[]);
+            children.get(id).push(a.other);
+            q.push(a.other);
+          }
+        }
+      }
+    }
+    const leaves=new Map();
+    function countL(id){
+      if(leaves.has(id)) return leaves.get(id);
+      const ch=children.get(id)||[];
+      let c=0; if(!ch.length) c=1; else for(const k of ch) c+=countL(k);
+      leaves.set(id,c); return c;
+    }
+    if(root!=null) countL(root);
+    const RING=115;
+    function place(id,a0,a1){
+      const d=depth.get(id)||0, r=d*RING, a=(a0+a1)/2;
+      out.set(id,[Math.cos(a)*r, Math.sin(a)*r, 0]);
+      const ch=(children.get(id)||[]).slice().sort(function(x,y){ return countL(y)-countL(x); });
+      let acc=a0; const total=Math.max(1,countL(id));
+      for(const k of ch){ const span=(a1-a0)*countL(k)/total; place(k,acc,acc+span); acc+=span; }
+    }
+    if(root!=null) place(root,0,Math.PI*2);
+    let maxD=0; for(const d of depth.values()) if(d>maxD) maxD=d;
+    const un=S.nodes.filter(n=>!out.has(n.id));
+    un.forEach(function(n,i){
+      const a=(i/Math.max(1,un.length))*Math.PI*2, r=(maxD+1.6)*RING;
+      out.set(n.id,[Math.cos(a)*r,Math.sin(a)*r,0]);
+    });
+    pool.setTargets(out, false);
+    fit.R=Math.max(200,(maxD+2)*RING);
+  }
+  const viz={
+    name:'RADIAL TREE',
+    prepare:function(dt){ if(ver!==S.version) layout(); pool.tick(dt); },
+    worldPos:function(id){ return pool.get(id); },
+    project:function(x,y){
+      const sc=(Math.min(S.view.w,S.view.h)/2.15)/fit.R;
+      return [S.view.w/2+x*sc, S.view.h/2+y*sc, clamp(sc*2.2,0.4,1.8), 1];
+    },
+    drawEdges:function(v){
+      // slightly curved tree edges (quadratic toward parent midpoint)
+      ctx.lineWidth=1;
+      for(const e of S.edges){
+        const a=v.worldPos(e.src), b=v.worldPos(e.dst); if(!a||!b) continue;
+        const pa=v.project(a[0],a[1],0), pb=v.project(b[0],b[1],0);
+        ctx.strokeStyle=hexA(kindColor(e.kind),0.16);
+        ctx.beginPath(); ctx.moveTo(pa[0],pa[1]);
+        ctx.quadraticCurveTo((pa[0]+pb[0])/2,(pa[1]+pb[1])/2,pb[0],pb[1]);
+        ctx.stroke();
+      }
+    },
+    edgePoint:function(e,t){ return straightEdgePoint(viz,e,t); },
+    drawExtras:function(){
+      if(root && S.nodeById.has(root)){
+        const w=viz.worldPos(root); if(!w) return;
+        const p=viz.project(w[0],w[1],0);
+        ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='10px "Courier New",monospace'; ctx.textAlign='center';
+        ctx.fillText('ROOT: '+root, p[0], p[1]-14); ctx.textAlign='left';
+      }
+    }
+  };
+  return viz;
+}
+
+/* ================= VIZ 4: HEATMAP (kind × severity grid, bundled edges) ================= */
+const SEVBUCKETS=[['crit',0.8],['high',0.55],['med',0.3],['low',0.05],['none',-1]];
+function sevBucket(sev){
+  const s=sevScore(sev);
+  for(const b of SEVBUCKETS) if(s>=b[1]) return b[0];
+  return 'none';
+}
+function makeHeatmap(){
+  let ver=-1, grid=null, cols=[], colX=new Map(), pairCurves=new Map(), geom={};
+  function rebuild(){
+    ver=S.version;
+    const counts=new Map();
+    for(const n of S.nodes) counts.set(n.kind,(counts.get(n.kind)||0)+1);
+    cols=counts.entries ? Array.from(counts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,12).map(x=>x[0]) : [];
+    if(counts.size>12) cols.push('(other)');
+    const colOf=function(kind){ return cols.indexOf(kind)>=0?kind:(cols[cols.length-1]==='(other)'?'(other)':kind); };
+    // cells[col][bucket] = {count, ids}
+    grid=new Map();
+    for(const n of S.nodes){
+      const c=colOf(n.kind), b=sevBucket(n.severity), k=c+'|'+b;
+      if(!grid.has(k)) grid.set(k,{count:0,ids:[]});
+      const g=grid.get(k); g.count++; if(g.ids.length<400) g.ids.push(n.id);
+    }
+    // bundled edge curves between kind columns
+    pairCurves=new Map();
+    const pairCount=new Map();
+    for(const e of S.edges){
+      const ns=S.nodeById.get(e.src), nd=S.nodeById.get(e.dst); if(!ns||!nd) continue;
+      const k=edgeKey(colOf(ns.kind),colOf(nd.kind));
+      pairCount.set(k,(pairCount.get(k)||0)+1);
+    }
+    const top=Array.from(pairCount.entries()).sort((a,b)=>b[1]-a[1]).slice(0,60);
+    for(const pc of top) pairCurves.set(pc[0], pc[1]);
+    colX=new Map();
+  }
+  function computeGeom(){
+    const rows=SEVBUCKETS.length, nc=Math.max(1,cols.length);
+    const cw=Math.min(90,(S.view.w-160)/nc), ch=Math.min(64,(S.view.h-190)/rows);
+    const x0=(S.view.w-cw*nc)/2, y0=92;
+    geom={cw:cw,ch:ch,x0:x0,y0:y0,rows:rows,nc:nc};
+    for(let i=0;i<cols.length;i++) colX.set(cols[i], x0+cw*(i+0.5));
+  }
+  function colCenter(kind){ return colX.get(kind)||S.view.w/2; }
+  function bundlePts(kindA,kindB){
+    const x1=colCenter(kindA), x2=colCenter(kindB);
+    const y=S.view.h*0.52;
+    const mx=(x1+x2)/2, my=y-Math.abs(x2-x1)*0.28-40;
+    return {p0:[x1,y], c:[mx,my], p1:[x2,y]};
+  }
+  function colOfKind(kind){ return cols.indexOf(kind)>=0?kind:'(other)'; }
+  const viz={
+    name:'HEATMAP',
+    drawNodesSkip:true,
+    prepare:function(){ if(ver!==S.version) rebuild(); computeGeom(); },
+    worldPos:function(){ return null; },
+    project:function(){ return null; },
+    edgePoint:function(e,t){
+      const ns=S.nodeById.get(e.src), nd=S.nodeById.get(e.dst); if(!ns||!nd) return null;
+      const b=bundlePts(colOfKind(ns.kind),colOfKind(nd.kind));
+      const u=1-t;
+      const x=u*u*b.p0[0]+2*u*t*b.c[0]+t*t*b.p1[0];
+      const y=u*u*b.p0[1]+2*u*t*b.c[1]+t*t*b.p1[1];
+      return [x,y,1,1];
+    },
+    drawScene:function(){
+      computeGeom();
+      const g=geom;
+      // bundled edges between kind columns
+      let maxPair=1; for(const v of pairCurves.values()) if(v>maxPair) maxPair=v;
+      ctx.lineWidth=1;
+      for(const pc of pairCurves){
+        const kk=pc[0].split('|');
+        const b=bundlePts(kk[0],kk[1]);
+        ctx.strokeStyle=hexA(kindColor(kk[0]), 0.05+0.20*pc[1]/maxPair);
+        ctx.beginPath(); ctx.moveTo(b.p0[0],b.p0[1]); ctx.quadraticCurveTo(b.c[0],b.c[1],b.p1[0],b.p1[1]); ctx.stroke();
+      }
+      drawParticles(viz);
+      // grid
+      let maxC=1; for(const v of grid.values()) if(v.count>maxC) maxC=v.count;
+      ctx.font='9px "Courier New",monospace'; ctx.textAlign='center';
+      for(let ci=0;ci<cols.length;ci++){
+        ctx.fillStyle=kindColor(cols[ci]);
+        ctx.fillText(cols[ci].slice(0,11), g.x0+g.cw*(ci+0.5), g.y0-12);
+      }
+      ctx.textAlign='right';
+      for(let r=0;r<g.rows;r++){
+        ctx.fillStyle='rgba(93,138,147,.9)';
+        ctx.fillText(SEVBUCKETS[r][0].toUpperCase(), g.x0-8, g.y0+g.ch*(r+0.5)+3);
+      }
+      ctx.textAlign='center';
+      for(let ci=0;ci<cols.length;ci++){
+        for(let r=0;r<g.rows;r++){
+          const key=cols[ci]+'|'+SEVBUCKETS[r][0];
+          const cell=grid.get(key);
+          const x=g.x0+g.cw*ci, y=g.y0+g.ch*r;
+          const inten=cell?cell.count/maxC:0;
+          ctx.fillStyle=hexA(kindColor(cols[ci]), cell?0.10+0.65*Math.sqrt(inten):0.03);
+          ctx.fillRect(x+1,y+1,g.cw-2,g.ch-2);
+          ctx.strokeStyle='rgba(66,248,255,.14)'; ctx.strokeRect(x+0.5,y+0.5,g.cw-1,g.ch-1);
+          if(cell){
+            ctx.fillStyle=inten>0.35?'#000':'rgba(255,255,255,.85)';
+            ctx.fillText(String(cell.count), x+g.cw/2, y+g.ch/2+3);
+            S.cells.push({x0:x,y0:y,x1:x+g.cw,y1:y+g.ch,type:'heat',kind:cols[ci],bucket:SEVBUCKETS[r][0],ids:cell.ids});
+          } else {
+            S.cells.push({x0:x,y0:y,x1:x+g.cw,y1:y+g.ch,type:'heat',kind:cols[ci],bucket:SEVBUCKETS[r][0],ids:[]});
+          }
+        }
+      }
+    },
+    hit:function(x,y){
+      for(const c of S.cells) if(x>=c.x0&&x<=c.x1&&y>=c.y0&&y<=c.y1) return {type:'cell', cell:c};
+      return null;
+    },
+    onCell:function(c){
+      const wrap=el('div');
+      wrap.innerHTML='<div class="dimnote">kind <b style="color:'+kindColor(c.kind)+'">'+esc(c.kind)+'</b> · severity <b>'+esc(c.bucket)+'</b> · '+c.ids.length+' nodes</div>';
+      for(const id of c.ids.slice(0,300)){
+        const a=el('span','nlist',id);
+        a.addEventListener('click', function(){ hideModal(); selectNode(id); });
+        wrap.appendChild(a);
+      }
+      showModal('CELL: '+c.kind+' / '+c.bucket, wrap);
+    }
+  };
+  return viz;
+}
+</script>
+<script>
+'use strict';
+/* ================= VIZ 5: ADJACENCY MATRIX ================= */
+function makeMatrix(){
+  const TOPN=40;
+  let ver=-1, top=[], idx=new Map(), cellEdges=new Map(), geom={cs:10,x0:120,y0:80};
+  function rebuild(){
+    ver=S.version;
+    top=S.nodes.slice().sort(function(a,b){ return degreeOf(b.id)-degreeOf(a.id); }).slice(0,TOPN);
+    idx=new Map(top.map(function(n,i){ return [n.id,i]; }));
+    cellEdges=new Map();
+    for(const e of S.edges){
+      if(!idx.has(e.src)||!idx.has(e.dst)) continue;
+      const k=idx.get(e.src)+'|'+idx.get(e.dst);
+      if(!cellEdges.has(k)) cellEdges.set(k,[]);
+      cellEdges.get(k).push(e);
+    }
+  }
+  function computeGeom(){
+    const n=Math.max(1,top.length);
+    const cs=Math.max(6,Math.min((S.view.w-180)/n,(S.view.h-140)/n,22));
+    geom={cs:cs, x0:(S.view.w-cs*n)/2+30, y0:(S.view.h-cs*n)/2+10, n:n};
+  }
+  const viz={
+    name:'ADJ MATRIX',
+    drawNodesSkip:true,
+    prepare:function(){ if(ver!==S.version) rebuild(); computeGeom(); },
+    worldPos:function(){ return null; },
+    project:function(){ return null; },
+    edgePoint:function(e,t){
+      // particle travels: row-header → cell → column-header (right-angle path)
+      const i=idx.get(e.src), j=idx.get(e.dst);
+      if(i==null||j==null) return null;
+      const g=geom;
+      const yRow=g.y0+(i+0.5)*g.cs, xCol=g.x0+(j+0.5)*g.cs;
+      const xStart=g.x0-6, yTop=g.y0-6;
+      const leg1=Math.max(1,xCol-xStart), leg2=Math.max(1,yRow-yTop);
+      const tt=t*(leg1+leg2);
+      if(tt<leg1) return [xStart+tt, yRow, 1, 0.9];
+      return [xCol, yRow-(tt-leg1), 1, 0.9];
+    },
+    drawScene:function(){
+      computeGeom();
+      const g=geom, n=top.length;
+      ctx.font='8px "Courier New",monospace';
+      // axis labels
+      ctx.textAlign='right'; ctx.textBaseline='middle';
+      for(let i=0;i<n;i++){
+        ctx.fillStyle=kindColor(top[i].kind);
+        ctx.fillText(top[i].label.slice(0,14), g.x0-5, g.y0+(i+0.5)*g.cs);
+        S.cells.push({x0:0,y0:g.y0+i*g.cs,x1:g.x0-2,y1:g.y0+(i+1)*g.cs,type:'node',id:top[i].id});
+      }
+      ctx.textAlign='left';
+      for(let j=0;j<n;j++){
+        ctx.save();
+        ctx.translate(g.x0+(j+0.5)*g.cs, g.y0-5);
+        ctx.rotate(-Math.PI/3.2);
+        ctx.fillStyle=kindColor(top[j].kind);
+        ctx.fillText(top[j].label.slice(0,12), 0, 0);
+        ctx.restore();
+        S.cells.push({x0:g.x0+j*g.cs,y0:0,x1:g.x0+(j+1)*g.cs,y1:g.y0-2,type:'node',id:top[j].id});
+      }
+      ctx.textBaseline='alphabetic';
+      // faint grid
+      ctx.strokeStyle='rgba(66,248,255,.05)';
+      for(let i=0;i<=n;i++){
+        ctx.beginPath(); ctx.moveTo(g.x0,g.y0+i*g.cs); ctx.lineTo(g.x0+n*g.cs,g.y0+i*g.cs); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(g.x0+i*g.cs,g.y0); ctx.lineTo(g.x0+i*g.cs,g.y0+n*g.cs); ctx.stroke();
+      }
+      // edge cells
+      for(const ce of cellEdges){
+        const ij=ce[0].split('|'); const i=+ij[0], j=+ij[1];
+        const list=ce[1];
+        const e0=list[0];
+        const x=g.x0+j*g.cs, y=g.y0+i*g.cs;
+        const a=clamp(0.35+0.15*list.length+0.1*(e0.strength||1),0,0.95);
+        ctx.fillStyle=hexA(kindColor(e0.kind), a);
+        ctx.fillRect(x+0.5,y+0.5,g.cs-1,g.cs-1);
+        S.cells.push({x0:x,y0:y,x1:x+g.cs,y1:y+g.cs,type:'mcell',i:i,j:j,edges:list});
+      }
+      drawParticles(viz);
+    },
+    hit:function(x,y){
+      for(let k=S.cells.length-1;k>=0;k--){ const c=S.cells[k];
+        if(x>=c.x0&&x<=c.x1&&y>=c.y0&&y<=c.y1){
+          if(c.type==='node') return {type:'node', id:c.id};
+          return {type:'cell', cell:c};
+        } }
+      return null;
+    },
+    onCell:function(c){
+      const wrap=el('div');
+      const A=top[c.i], B=top[c.j];
+      wrap.innerHTML='<div class="dimnote">'+c.edges.length+' edge(s): <b style="color:var(--cyan)">'+esc(A?A.id:'?')+'</b> ↔ <b style="color:var(--mag)">'+esc(B?B.id:'?')+'</b></div>';
+      for(const e of c.edges.slice(0,200)){
+        const row=el('div','eedge');
+        row.innerHTML='<span class="kd" style="color:'+kindColor(e.kind)+'">'+esc(e.kind)+'</span><span class="st">'+esc(fmtNum(e.strength))+'</span><span class="oid">'+esc(e.src)+' → '+esc(e.dst)+'</span>';
+        row.addEventListener('click', function(){ S.flash={src:e.src,dst:e.dst,until:performance.now()/1000+2.8}; hideModal(); });
+        wrap.appendChild(row);
+      }
+      const b1=el('button','btn','INSPECT '+ (A?A.id.slice(0,18):'')); b1.style.margin='6px 6px 0 0';
+      b1.addEventListener('click', function(){ if(A){ hideModal(); selectNode(A.id); } });
+      const b2=el('button','btn','INSPECT '+ (B?B.id.slice(0,18):''));
+      b2.addEventListener('click', function(){ if(B){ hideModal(); selectNode(B.id); } });
+      wrap.appendChild(b1); wrap.appendChild(b2);
+      showModal('MATRIX CELL ['+c.i+','+c.j+']', wrap);
+    }
+  };
+  return viz;
+}
+
+/* ================= VIZ 6: HIVE PLOT ================= */
+function quadPt(p0,c,p1,t){ const u=1-t;
+  return [u*u*p0[0]+2*u*t*c[0]+t*t*p1[0], u*u*p0[1]+2*u*t*c[1]+t*t*p1[1]]; }
+function makeHive(){
+  const pool=new LerpPool();
+  let ver=-1, axes=[], axisAng=new Map(), edgesDraw=[], geom={R:200};
+  function rebuild(){
+    ver=S.version;
+    const counts=new Map();
+    for(const n of S.nodes) counts.set(n.kind,(counts.get(n.kind)||0)+1);
+    axes=Array.from(counts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]);
+    if(counts.size>6) axes.push('(other)');
+    const m=Math.max(1,axes.length);
+    axisAng=new Map(axes.map(function(k,i){ return [k, -Math.PI/2 + i*2*Math.PI/m]; }));
+    const axisOf=function(kind){ return axes.indexOf(kind)>=0?kind:'(other)'; };
+    // rank nodes on their axis by degree
+    const byAxis=new Map(axes.map(function(k){ return [k,[]]; }));
+    for(const n of S.nodes) byAxis.get(axisOf(n.kind)).push(n);
+    const out=new Map();
+    for(const k of axes){
+      const arr=byAxis.get(k).sort(function(a,b){ return degreeOf(a.id)-degreeOf(b.id); });
+      const ang=axisAng.get(k);
+      arr.forEach(function(n,i){
+        const t=(i+1)/(arr.length+1);
+        const r=34+t*geom.R;
+        out.set(n.id,[Math.cos(ang)*r, Math.sin(ang)*r, 0]);
+      });
+    }
+    pool.setTargets(out,false);
+    // draw strongest edges only (readability)
+    edgesDraw=S.edges.slice().sort(function(a,b){ return (b.strength||1)-(a.strength||1); }).slice(0,1500);
+  }
+  function ctrlFor(a,b){
+    // control near center, bulged perpendicular when both ends share an axis
+    const same=Math.abs(Math.atan2(a[1],a[0])-Math.atan2(b[1],b[0]))<0.01;
+    const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
+    if(same){ const d=Math.hypot(mx,my)||1; return [mx/d*(d+70), my/d*(d+70)]; }
+    return [mx*0.14, my*0.14];
+  }
+  const viz={
+    name:'HIVE PLOT',
+    prepare:function(dt){
+      geom.R=Math.min(S.view.w,S.view.h)/2-70;
+      if(ver!==S.version) rebuild();
+      pool.tick(dt);
+    },
+    worldPos:function(id){ return pool.get(id); },
+    project:function(x,y){ return [S.view.w/2+x, S.view.h/2+y, 0.9, 1]; },
+    drawEdges:function(){
+      ctx.lineWidth=1;
+      for(const e of edgesDraw){
+        const a=viz.worldPos(e.src), b=viz.worldPos(e.dst); if(!a||!b) continue;
+        const pa=viz.project(a[0],a[1],0), pb=viz.project(b[0],b[1],0);
+        const c=ctrlFor(pa,pb);
+        ctx.strokeStyle=hexA(kindColor(e.kind),0.13);
+        ctx.beginPath(); ctx.moveTo(pa[0],pa[1]); ctx.quadraticCurveTo(c[0],c[1],pb[0],pb[1]); ctx.stroke();
+      }
+    },
+    edgePoint:function(e,t){
+      const a=viz.worldPos(e.src), b=viz.worldPos(e.dst); if(!a||!b) return null;
+      const pa=viz.project(a[0],a[1],0), pb=viz.project(b[0],b[1],0);
+      const c=ctrlFor(pa,pb);
+      const p=quadPt(pa,c,pb,t);
+      return [p[0],p[1],1,1];
+    },
+    drawExtras:function(){
+      ctx.font='10px "Courier New",monospace'; ctx.textAlign='center';
+      const cx=S.view.w/2, cy=S.view.h/2;
+      for(const k of axes){
+        const ang=axisAng.get(k);
+        const x=cx+Math.cos(ang)*(geom.R+30), y=cy+Math.sin(ang)*(geom.R+30);
+        ctx.strokeStyle=hexA(kindColor(k),0.35);
+        ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*20, cy+Math.sin(ang)*20);
+        ctx.lineTo(cx+Math.cos(ang)*(geom.R+18), cy+Math.sin(ang)*(geom.R+18)); ctx.stroke();
+        ctx.fillStyle=kindColor(k);
+        ctx.fillText(k.slice(0,14).toUpperCase(), x, y);
+      }
+      ctx.textAlign='left';
+    }
+  };
+  return viz;
+}
+
+/* ================= VIZ 7: ARC DIAGRAM ================= */
+function makeArc(){
+  const pool=new LerpPool();
+  let ver=-1, order=[], edgesDraw=[], yLine=0;
+  function rebuild(){
+    ver=S.version;
+    order=S.nodes.slice().sort(function(a,b){
+      if(a.kind!==b.kind) return a.kind<b.kind?-1:1;
+      return degreeOf(b.id)-degreeOf(a.id);
+    });
+    const n=Math.max(1,order.length);
+    const margin=54;
+    const out=new Map();
+    order.forEach(function(node,i){
+      const x=n===1?S.view.w/2:margin+i*(S.view.w-2*margin)/(n-1);
+      out.set(node.id,[x,0,0]);
+    });
+    pool.setTargets(out,false);
+    edgesDraw=S.edges.slice().sort(function(a,b){ return (b.strength||1)-(a.strength||1); }).slice(0,3000);
+  }
+  function arcGeom(a,b){
+    const x0=a[0], x1=b[0];
+    const cx=(x0+x1)/2, r=Math.max(1.5,Math.abs(x1-x0)/2);
+    return {cx:cx, r:r, left:x0<x1};
+  }
+  const viz={
+    name:'ARC DIAGRAM',
+    prepare:function(dt){ yLine=S.view.h*0.60; if(ver!==S.version) rebuild(); pool.tick(dt); },
+    worldPos:function(id){ const p=pool.get(id); return p?[p[0],yLine,0]:null; },
+    project:function(x,y){ return [x,y,0.85,1]; },
+    drawEdges:function(){
+      ctx.lineWidth=1;
+      for(const e of edgesDraw){
+        const a=viz.worldPos(e.src), b=viz.worldPos(e.dst); if(!a||!b) continue;
+        if(Math.abs(a[0]-b[0])<2) continue;
+        const g=arcGeom(a,b);
+        ctx.strokeStyle=hexA(kindColor(e.kind), clamp(0.10+0.08*(e.strength||1),0,0.5));
+        ctx.beginPath();
+        ctx.arc(g.cx, yLine, g.r, Math.PI, 0, false);
+        ctx.stroke();
+      }
+    },
+    edgePoint:function(e,t){
+      const a=viz.worldPos(e.src), b=viz.worldPos(e.dst); if(!a||!b) return null;
+      const g=arcGeom(a,b);
+      const ang=g.left ? Math.PI*(1-t) : Math.PI*t;
+      return [g.cx+g.r*Math.cos(ang), yLine-g.r*Math.sin(ang), 1, 1];
+    },
+    drawExtras:function(){
+      ctx.strokeStyle='rgba(66,248,255,.28)';
+      ctx.beginPath(); ctx.moveTo(30,yLine); ctx.lineTo(S.view.w-30,yLine); ctx.stroke();
+      // labels for high-degree nodes only (avoid clutter)
+      ctx.font='8px "Courier New",monospace'; ctx.textAlign='center';
+      let shown=0;
+      for(const node of order){
+        if(shown>=26) break;
+        if(degreeOf(node.id)<2 && order.length>60) continue;
+        const w=viz.worldPos(node.id); if(!w) continue;
+        ctx.save(); ctx.translate(w[0],yLine+9); ctx.rotate(Math.PI/2.6);
+        ctx.fillStyle=kindColor(node.kind); ctx.textAlign='left';
+        ctx.fillText(node.label.slice(0,16),0,0);
+        ctx.restore(); shown++;
+      }
+      ctx.textAlign='left';
+    }
+  };
+  return viz;
+}
+</script>
+<script>
+'use strict';
+/* ================= VIZ 8: 3D PARTICLE FIELD ================= */
+function idPhase(id){ // deterministic per-node phase offsets
+  let h=0; for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))|0;
+  return [(h&1023)/1023*6.283, ((h>>10)&1023)/1023*6.283, ((h>>20)&1023)/1023*6.283];
+}
+function makeField3D(){
+  let yaw=0.4, R=300, zoom=1;
+  const pitch=0.42;
+  const viz={
+    name:'PARTICLE FIELD 3D',
+    prepare:function(dt){
+      if(!S.paused) yaw += dt*0.05*speedMult(); // slow cinematic drift-rotation
+      let m=1;
+      for(const n of S.nodes){ const d=Math.hypot(n.x,n.y,n.z); if(d>m) m=d; }
+      R=m;
+    },
+    worldPos:function(id){
+      const p=POS.get(id); if(!p) return null;
+      const ph=idPhase(id), t=S.time;
+      // slow per-particle drift makes the cloud feel alive
+      return [ p[0]+Math.sin(t*0.31+ph[0])*16, p[1]+Math.cos(t*0.23+ph[1])*16, p[2]+Math.sin(t*0.27+ph[2])*16 ];
+    },
+    project:function(x,y,z){
+      const base=(Math.min(S.view.w,S.view.h)/2.5)/Math.max(R,1)*zoom;
+      const cy=Math.cos(yaw), sy=Math.sin(yaw), cp=Math.cos(pitch), sp=Math.sin(pitch);
+      const x1=x*cy+z*sy, z1=-x*sy+z*cy;
+      const y1=y*cp-z1*sp, z2=y*sp+z1*cp;
+      const fov=3.0, s=fov/(fov+z2*base/140);
+      const depth=clamp(1.1-(z2*base/140+2.2)/4.4, 0.06, 1); // fog
+      return [S.view.w/2+x1*base*s*0.95, S.view.h/2+y1*base*s*0.95, clamp(s,0.2,2.4), depth];
+    },
+    drawEdges:function(){
+      ctx.lineWidth=1;
+      ctx.strokeStyle='rgba(66,248,255,.045)';
+      ctx.beginPath();
+      for(const e of S.edges){
+        const a=viz.worldPos(e.src), b=viz.worldPos(e.dst); if(!a||!b) continue;
+        const pa=viz.project(a[0],a[1],a[2]), pb=viz.project(b[0],b[1],b[2]);
+        ctx.moveTo(pa[0],pa[1]); ctx.lineTo(pb[0],pb[1]);
+      }
+      ctx.stroke();
+    },
+    edgePoint:function(e,t){ return straightEdgePoint(viz,e,t); },
+    drawScene:function(){
+      viz.drawEdges();
+      // additive glow pass: nodes + particles as light emitters with fog depth
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+      for(const n of S.nodes){
+        const w=viz.worldPos(n.id); if(!w) continue;
+        const pt=viz.project(w[0],w[1],w[2]); if(!pt) continue;
+        const sx=pt[0], sy=pt[1], sc=pt[2], al=pt[3];
+        if(sx<-40||sy<-40||sx>S.view.w+40||sy>S.view.h+40) continue;
+        const r=clamp((4.5+degreeOf(n.id)*0.25)*sc,2,18);
+        drawGlow(sx,sy,r,kindColor(n.kind),0.55*al);
+        S.screen.set(n.id,{x:sx,y:sy,r:Math.max(r*0.6,7)});
+      }
+      drawParticles(viz);
+      ctx.restore();
+    },
+    onWheel:function(d){ zoom=clamp(zoom*(d>0?0.9:1.12),0.3,4); }
+  };
+  return viz;
+}
+
+/* ================= VIZ 9: 4D FRAME SCANNER ================= */
+/* FS holds the time-slider playhead, ghost trails and event markers.
+   Purpose: let humans & AI see where things are and how they move over time. */
+const FS = {
+  ft: 0,             // fractional frame index (playhead)
+  slowed: false,     // per-viz extra 10x slow ("slowed objects")
+  scrubbing: false,
+  trails: new Map(), // id -> [{x,y}]
+  TRAILK: 10,
+  lastFrameInt: -1,
+  onFrames: function(){
+    const n=S.frames.length;
+    const sl=$('#fslider'); if(sl) sl.max=Math.max(0,n-1);
+    if(this.ft>n-1) this.ft=Math.max(0,n-1);
+    // event markers on the timeline (from frame-embedded events)
+    const fm=$('#fmarks'); if(!fm) return;
+    fm.innerHTML='';
+    if(n>1){
+      S.frames.forEach(function(fr,i){
+        if(fr && Array.isArray(fr.events) && fr.events.length){
+          const d=el('div','mark');
+          d.style.left=(i/(n-1)*100)+'%';
+          fm.appendChild(d);
+        }
+      });
+    }
+  },
+  onEvent: function(){ /* live flows also nudge the boost system; markers come from frames */ },
+  frameAt: function(i){
+    i=clamp(i,0,S.frames.length-1);
+    return S.frames[i]||null;
+  }
+};
+$('#fslider').addEventListener('input', function(){ FS.ft=parseFloat(this.value)||0; FS.scrubbing=true; });
+$('#fslider').addEventListener('change', function(){ FS.scrubbing=false; });
+$('#fslow').addEventListener('change', function(){ FS.slowed=this.checked; });
+
+function makeFrameScanner(){
+  let R=300;
+  const yaw=0.75, pitch=0.38;
+  function posAt(id, fi, frac){
+    const f0=FS.frameAt(fi), f1=FS.frameAt(Math.min(fi+1,S.frames.length-1));
+    const p0=f0&&f0.positions?f0.positions[id]:null;
+    const p1=f1&&f1.positions?f1.positions[id]:null;
+    if(p0&&p1) return [lerp(p0[0],p1[0],frac), lerp(p0[1],p1[1],frac), lerp(p0[2]||0,p1[2]||0,frac)];
+    if(p0) return [p0[0],p0[1],p0[2]||0];
+    const d=POS.get(id); // node absent from frames → sit at current viz-data coords
+    return d?[d[0],d[1],d[2]]:null;
+  }
+  const viz={
+    name:'4D FRAME SCANNER',
+    prepare:function(dt){
+      const n=S.frames.length;
+      // advance playhead at the global speed (extra 10x slow when "slowed objects" is on)
+      if(!S.paused && !FS.scrubbing && n>1){
+        FS.ft += dt*1.6*speedMult()*(FS.slowed?0.1:1);
+        if(FS.ft>=n-1) FS.ft=0; // loop the tape
+      }
+      if(n<1) FS.ft=0;
+      FS.ft=clamp(FS.ft,0,Math.max(0,n-1));
+      // frame-crossing: fire events embedded in the newly entered frame
+      const fi=Math.floor(FS.ft);
+      if(fi!==FS.lastFrameInt){
+        FS.lastFrameInt=fi;
+        const fr=FS.frameAt(fi);
+        if(fr&&Array.isArray(fr.events)){
+          for(const ev of fr.events.slice(0,12)) flowBoost(ev);
+        }
+      }
+      let m=1;
+      for(const nd of S.nodes){ const d=Math.hypot(nd.x,nd.y,nd.z); if(d>m) m=d; }
+      R=m;
+      // sync the DOM slider + readout
+      const sl=$('#fslider');
+      if(sl && !FS.scrubbing) sl.value=FS.ft;
+      const fr=$('#fread'); if(fr) fr.textContent='f '+FS.ft.toFixed(1)+'/'+Math.max(0,n-1)+'  '+viz.frameReadout();
+    },
+    worldPos:function(id){
+      if(!S.frames.length){ const p=POS.get(id); return p?[p[0],p[1],p[2]]:null; }
+      const fi=Math.floor(FS.ft), frac=FS.ft-fi;
+      return posAt(id,fi,frac);
+    },
+    project:function(x,y,z){
+      const base=(Math.min(S.view.w,S.view.h)/2.45)/Math.max(R,1);
+      const cy=Math.cos(yaw), sy=Math.sin(yaw), cp=Math.cos(pitch), sp=Math.sin(pitch);
+      const x1=x*cy+z*sy, z1=-x*sy+z*cy;
+      const y1=y*cp-z1*sp, z2=y*sp+z1*cp;
+      const fov=3.2, s=fov/(fov+z2*base/140);
+      return [S.view.w/2+x1*base*s*0.95, S.view.h/2+y1*base*s*0.95, clamp(s,0.25,2.4), 1];
+    },
+    edgePoint:function(e,t){ return straightEdgePoint(viz,e,t); },
+    drawExtras:function(){
+      // ghost trails: last K projected positions, fading
+      for(const n of S.nodes){
+        const w=viz.worldPos(n.id); if(!w) continue;
+        const pt=viz.project(w[0],w[1],w[2]); if(!pt) continue;
+        let tr=FS.trails.get(n.id);
+        if(!tr){ tr=[]; FS.trails.set(n.id,tr); }
+        tr.push({x:pt[0],y:pt[1]});
+        if(tr.length>FS.TRAILK) tr.shift();
+        const col=kindColor(n.kind);
+        for(let i=0;i<tr.length-1;i++){
+          const a=(i+1)/tr.length*0.30;
+          ctx.strokeStyle=hexA(col,a);
+          ctx.beginPath(); ctx.moveTo(tr[i].x,tr[i].y); ctx.lineTo(tr[i+1].x,tr[i+1].y); ctx.stroke();
+        }
+      }
+      // prune trails for removed nodes
+      if(FS.trails.size>S.nodes.length*2+50){
+        const ids=new Set(S.nodes.map(n=>n.id));
+        for(const k of Array.from(FS.trails.keys())) if(!ids.has(k)) FS.trails.delete(k);
+      }
+      if(!S.frames.length){
+        ctx.fillStyle='rgba(255,212,71,.8)'; ctx.font='12px "Courier New",monospace'; ctx.textAlign='center';
+        ctx.fillText('NO FRAMES IN viz-data — showing live positions', S.view.w/2, 40);
+        ctx.textAlign='left';
+      }
+    },
+    frameReadout:function(){
+      const n=S.frames.length; if(!n) return '';
+      const fi=Math.floor(FS.ft), frac=FS.ft-fi;
+      const f0=FS.frameAt(fi), f1=FS.frameAt(Math.min(fi+1,n-1));
+      const t0=f0&&f0.t!=null?(+f0.t):fi, t1=f1&&f1.t!=null?(+f1.t):t0;
+      return 't='+fmtTs(lerp(t0,t1,frac));
+    }
+  };
+  return viz;
+}
+
+/* ================= VIZ 10: AI LATENT PROJECTION ================= */
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0;
+  let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }; }
+function dotv(a,b){ let s=0; for(let i=0;i<a.length;i++) s+=a[i]*b[i]; return s; }
+function convexHull(points){
+  if(points.length<3) return points.slice();
+  const pts=points.slice().sort(function(a,b){ return a[0]-b[0]||a[1]-b[1]; });
+  const cross=function(o,a,b){ return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); };
+  const lower=[]; for(const p of pts){ while(lower.length>=2&&cross(lower[lower.length-2],lower[lower.length-1],p)<=0) lower.pop(); lower.push(p); }
+  const upper=[]; for(let i=pts.length-1;i>=0;i--){ const p=pts[i]; while(upper.length>=2&&cross(upper[upper.length-2],upper[upper.length-1],p)<=0) upper.pop(); upper.push(p); }
+  lower.pop(); upper.pop(); return lower.concat(upper);
+}
+function makeLatent(){
+  const pool=new LerpPool();
+  let ver=-1, kinds=[], fit={cx:0,cy:0,sc:1};
+  function rebuild(){
+    ver=S.version;
+    // feature vector per node: kind one-hot over top kinds + log-degree + severity
+    const counts=new Map();
+    for(const n of S.nodes) counts.set(n.kind,(counts.get(n.kind)||0)+1);
+    kinds=Array.from(counts.entries()).sort(function(a,b){ return b[1]-a[1]; }).slice(0,8).map(function(x){ return x[0]; });
+    const kidx=new Map(kinds.map(function(k,i){ return [k,i]; }));
+    const D=kinds.length+2;
+    const X=S.nodes.map(function(n){
+      const v=new Array(D).fill(0);
+      const ki=kidx.get(n.kind); if(ki!=null) v[ki]=1;
+      v[D-2]=Math.log(1+degreeOf(n.id))/Math.log(25);
+      v[D-1]=sevScore(n.severity);
+      return v;
+    });
+    // center the design matrix
+    const mean=new Array(D).fill(0);
+    for(const v of X) for(let d=0;d<D;d++) mean[d]+=v[d];
+    const inv=1/Math.max(1,X.length);
+    for(let d=0;d<D;d++) mean[d]*=inv;
+    for(const v of X) for(let d=0;d<D;d++) v[d]-=mean[d];
+    // fixed random projection seeds the two components…
+    const rnd=mulberry32(1337);
+    const R=Array.from({length:D},function(){ return [rnd()*2-1, rnd()*2-1]; });
+    function matVec(v){ // covariance application C·v = Xᵀ(X·v) without forming C
+      const xv=X.map(function(row){ return dotv(row,v); });
+      const out=new Array(D).fill(0);
+      for(let i=0;i<X.length;i++){ const s=xv[i], row=X[i]; for(let d=0;d<D;d++) out[d]+=row[d]*s; }
+      return out;
+    }
+    function powerIter(seed,ortho){ // 60 iterations of power-iteration PCA refinement
+      let v=seed.slice();
+      for(let it=0;it<60;it++){
+        if(ortho){ const o=dotv(v,ortho); for(let d=0;d<D;d++) v[d]-=o*ortho[d]; }
+        const w=matVec(v);
+        let nrm=0; for(const x of w) nrm+=x*x; nrm=Math.sqrt(nrm)||1;
+        for(let d=0;d<D;d++) v[d]=w[d]/nrm;
+      }
+      return v;
+    }
+    const pc1=powerIter(R.map(function(r){ return r[0]; }),null);
+    const pc2=powerIter(R.map(function(r){ return r[1]; }),pc1);
+    const out=new Map();
+    let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+    S.nodes.forEach(function(n,i){
+      const c=[dotv(X[i],pc1), dotv(X[i],pc2)];
+      out.set(n.id,[c[0],c[1],0]);
+      if(c[0]<minx)minx=c[0]; if(c[0]>maxx)maxx=c[0];
+      if(c[1]<miny)miny=c[1]; if(c[1]>maxy)maxy=c[1];
+    });
+    pool.setTargets(out,false);
+    fit={ cx:(minx+maxx)/2||0, cy:(miny+maxy)/2||0,
+          sc:Math.min((S.view.w-140)/Math.max(1e-6,maxx-minx),(S.view.h-140)/Math.max(1e-6,maxy-miny)) };
+    if(!isFinite(fit.sc)||fit.sc<=0) fit.sc=1;
+  }
+  const viz={
+    name:'AI LATENT PROJECTION',
+    prepare:function(dt){ if(ver!==S.version) rebuild(); pool.tick(dt); },
+    worldPos:function(id){ return pool.get(id); },
+    project:function(x,y){
+      return [S.view.w/2+(x-fit.cx)*fit.sc, S.view.h/2+(y-fit.cy)*fit.sc, 0.95, 1];
+    },
+    drawEdges:function(){
+      ctx.lineWidth=1;
+      for(const e of S.edges){
+        const a=viz.worldPos(e.src), b=viz.worldPos(e.dst); if(!a||!b) continue;
+        const pa=viz.project(a[0],a[1],0), pb=viz.project(b[0],b[1],0);
+        ctx.strokeStyle=hexA(kindColor(e.kind),0.05);
+        ctx.beginPath(); ctx.moveTo(pa[0],pa[1]); ctx.lineTo(pb[0],pb[1]); ctx.stroke();
+      }
+    },
+    edgePoint:function(e,t){ return straightEdgePoint(viz,e,t); },
+    drawExtras:function(){
+      // convex-hull-ish cluster outlines + labels per top kind
+      ctx.font='10px "Courier New",monospace'; ctx.textAlign='center';
+      for(const k of kinds){
+        const pts=[];
+        for(const n of S.nodes){
+          if(n.kind!==k) continue;
+          const w=viz.worldPos(n.id); if(!w) continue;
+          const p=viz.project(w[0],w[1],0);
+          pts.push([p[0],p[1]]);
+          if(pts.length>=240) break;
+        }
+        if(pts.length<3) continue;
+        const hull=convexHull(pts);
+        let cx=0,cy=0; for(const p of pts){ cx+=p[0]; cy+=p[1]; }
+        cx/=pts.length; cy/=pts.length;
+        ctx.strokeStyle=hexA(kindColor(k),0.4);
+        ctx.fillStyle=hexA(kindColor(k),0.05);
+        ctx.beginPath();
+        hull.forEach(function(p,i){ if(i===0) ctx.moveTo(p[0],p[1]); else ctx.lineTo(p[0],p[1]); });
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle=kindColor(k);
+        ctx.fillText(k.slice(0,16).toUpperCase(), cx, cy);
+      }
+      ctx.textAlign='left';
+    }
+  };
+  return viz;
+}
+</script>
+<script>
+'use strict';
+/* ================= VIZ REGISTRY + SWITCHER ================= */
+const VIZ=[ makeForce2D(), makeForce3D(), makeRadial(), makeHeatmap(), makeMatrix(),
+            makeHive(), makeArc(), makeField3D(), makeFrameScanner(), makeLatent() ];
+const VIZ_SHORT=['2D FORCE','3D FORCE','RADIAL TREE','HEATMAP','MATRIX','HIVE PLOT','ARC DIAGRAM','FIELD 3D','4D SCAN','AI LATENT'];
+function buildVizBar(){
+  const bar=$('#vizbar');
+  const lab=el('span',null,'VIZ //'); lab.style.cssText='color:var(--mag);font-size:10px;letter-spacing:2px;text-shadow:0 0 7px rgba(255,43,214,.6);';
+  bar.appendChild(lab);
+  VIZ.forEach(function(v,i){
+    const b=el('button','btn small'+(i===S.viz?' on':''), VIZ_SHORT[i]);
+    b.title=v.name;
+    b.addEventListener('click', function(){ switchViz(i); });
+    bar.appendChild(b);
+  });
+}
+function switchViz(i){
+  S.viz=i;
+  $$('#vizbar .btn').forEach(function(b,j){ b.classList.toggle('on', j===i); });
+  $('#vizopts').classList.toggle('show', VIZ[i].name==='4D FRAME SCANNER');
+  syslog('viz → '+VIZ[i].name,'inf');
+}
+
+/* ================= MOUSE: hover tooltip / click inspect / drag / orbit / zoom ================= */
+const tip=$('#tip');
+function evPos(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
+function currentHit(x,y){
+  const viz=VIZ[S.viz];
+  if(viz.hit) return viz.hit(x,y);
+  return hitTestNodes(x,y);
+}
+function updateTip(x,y,hit){
+  let html='';
+  if(hit){
+    if(hit.type==='node'){
+      const n=S.nodeById.get(hit.id);
+      if(n){
+        html='<div class="tl">'+esc(n.label)+'</div>'+
+             '<div><span class="tk">'+esc(n.kind)+'</span> · deg '+degreeOf(n.id)+
+             (n.severity!=null?' · sev '+esc(String(n.severity)):'')+'</div>'+
+             '<div class="td">'+esc(n.id)+'</div>';
+      }
+    } else if(hit.type==='cell'){
+      const c=hit.cell;
+      if(c.type==='heat') html='<div class="tl">'+esc(c.kind)+' / '+esc(c.bucket)+'</div><div class="td">'+c.ids.length+' nodes — click to list</div>';
+      else if(c.type==='mcell' && c.edges && c.edges.length){
+        const e0=c.edges[0];
+        html='<div class="tl">'+esc(e0.src)+' ↔ '+esc(e0.dst)+'</div><div class="td">'+c.edges.length+' edge(s) — click for detail</div>';
+      }
+    }
+  }
+  if(!html){ tip.style.display='none'; S.hover=null; return; }
+  S.hover=hit;
+  tip.innerHTML=html;
+  tip.style.display='block';
+  tip.style.left=clamp(x+14,2,S.view.w-190)+'px';
+  tip.style.top=clamp(y+12,2,S.view.h-70)+'px';
+}
+let drag=false, dragMoved=false, downX=0, downY=0, lastX=0, lastY=0;
+cv.addEventListener('mousedown', function(e){
+  const p=evPos(e); downX=p[0]; downY=p[1]; lastX=p[0]; lastY=p[1]; dragMoved=false;
+  const viz=VIZ[S.viz];
+  if(viz.onDown && viz.onDown(p[0],p[1])) drag=true;
+});
+window.addEventListener('mousemove', function(e){
+  const p=evPos(e);
+  const viz=VIZ[S.viz];
+  if(drag){
+    const dx=p[0]-lastX, dy=p[1]-lastY;
+    if(Math.abs(p[0]-downX)+Math.abs(p[1]-downY)>4) dragMoved=true;
+    if(viz.onMove) viz.onMove(p[0],p[1],dx,dy);
+  } else if(p[0]>=0&&p[1]>=0&&p[0]<=S.view.w&&p[1]<=S.view.h){
+    const hit=currentHit(p[0],p[1]);
+    updateTip(p[0],p[1],hit);
+    cv.style.cursor=hit?'pointer':'crosshair';
+  } else {
+    tip.style.display='none';
+  }
+  lastX=p[0]; lastY=p[1];
+});
+window.addEventListener('mouseup', function(e){
+  const viz=VIZ[S.viz];
+  if(drag && viz.onUp) viz.onUp();
+  drag=false;
+  if(dragMoved) return;
+  const p=evPos(e);
+  if(p[0]<0||p[1]<0||p[0]>S.view.w||p[1]>S.view.h) return;
+  const hit=currentHit(p[0],p[1]);
+  if(!hit) return;
+  if(hit.type==='node') selectNode(hit.id);
+  else if(hit.type==='cell' && viz.onCell) viz.onCell(hit.cell);
+});
+cv.addEventListener('wheel', function(e){
+  const viz=VIZ[S.viz];
+  if(viz.onWheel){ e.preventDefault(); viz.onWheel(e.deltaY); }
+}, {passive:false});
+
+/* ================= MAIN RENDER LOOP ================= */
+function render(dt){
+  const viz=VIZ[S.viz];
+  ctx.clearRect(0,0,S.view.w,S.view.h);
+  S.screen.clear(); S.cells.length=0;
+  try{ viz.prepare(dt); }catch(e){ /* a viz must never kill the loop */ }
+  try{
+    if(viz.drawScene){ viz.drawScene(); }
+    else{
+      if(viz.drawEdges) viz.drawEdges(viz); else drawEdgesDefault(viz);
+      drawParticles(viz);
+      if(!viz.drawNodesSkip) drawNodesDefault(viz);
+      if(viz.drawExtras) viz.drawExtras();
+    }
+  }catch(e){}
+  try{ drawFlash(viz); }catch(e){}
+  try{ drawLegend(); }catch(e){}
+  updateReadout(viz);
+}
+let lastT=performance.now();
+function frame(now){
+  const rawDt=clamp((now-lastT)/1000,0,0.05); lastT=now;
+  const dt=S.paused?0:rawDt;
+  if(!S.paused) S.time+=rawDt;
+  PS.update(dt);
+  POS.tick(dt);
+  render(dt);
+  requestAnimationFrame(frame);
+}
+
+/* ================= BOOT ================= */
+function boot(){
+  buildVizBar();
+  resizeCanvas();
+  syslog('SSB BEAST GODSCOPE online — 10 viz armed','ok');
+  syslog('polling: health 1s · viz-data 2s · process-flow 1s','inf');
+  requestAnimationFrame(frame);
+  // immediate first hits, then steady pollers
+  pollHealth(); pollViz(); pollFlows();
+  loadTreeRoot(); loadEndpoints();
+  setInterval(pollHealth,1000);
+  setInterval(pollViz,2000);
+  setInterval(pollFlows,1000);
+}
+boot();
+</script>
+<script>
+'use strict';
+/* ================= MESSAGING + LIVE API (v12 additive) ================= */
+(function(){
+  /* ---- LIVE API feed strip ---- */
+  const apilog = document.getElementById('apilog');
+  const apicount = document.getElementById('c-apicount');
+  const seenApi = new Set();
+  function apiRow(f){
+    const key = [f.ts,f.path,f.latency_ms,f.prompt_preview].join('|');
+    if(seenApi.has(key)) return;
+    seenApi.add(key);
+    if(seenApi.size > 600){ const first = seenApi.values().next().value; seenApi.delete(first); }
+    const row = document.createElement('div');
+    const ok = f.ok ? '<span style="color:#7dffca">✔</span>' : '<span style="color:#ff1765">✘</span>';
+    const t = new Date((f.ts||0)*1000).toLocaleTimeString();
+    row.innerHTML = ok + ' <span style="color:#42f8ff">' + t + '</span> ' +
+      '<span style="color:#ff2bd6">' + (f.path||'') + '</span> ' +
+      '<span style="color:#ffd447">' + (f.model||'') + '</span> via ' + (f.provider_used||'?') +
+      ' <span style="color:#7a8694">' + (f.latency_ms||0) + 'ms — ' + (f.prompt_preview||'').replace(/</g,'&lt;') + '</span>';
+    apilog.insertBefore(row, apilog.firstChild);
+    while(apilog.children.length > 200) apilog.removeChild(apilog.lastChild);
+  }
+  async function pollApiFeed(){
+    try{
+      const r = await fetch('/beast/api/messaging/feed?limit=100');
+      const d = await r.json();
+      (d.flows||[]).slice().reverse().forEach(apiRow);
+      apicount.textContent = (d.count||0) + ' calls';
+    }catch(e){ /* degrade silently */ }
+  }
+  document.getElementById('b-apiclear').addEventListener('click', function(){ apilog.innerHTML=''; seenApi.clear(); });
+  setInterval(pollApiFeed, 2000); pollApiFeed();
+
+  /* ---- MESSAGES modal ---- */
+  function field(label, value, id){
+    const w = document.createElement('div'); w.style.margin='6px 0';
+    const l = document.createElement('div'); l.textContent = label; l.style.cssText='color:#7a8694;font-size:9px;letter-spacing:1px;';
+    const i = document.createElement('input'); i.id=id; i.value=value;
+    i.style.cssText='width:100%;background:#05080c;border:1px solid #1d3a45;color:#d5f7ff;padding:4px 6px;font-size:11px;font-family:inherit;';
+    w.appendChild(l); w.appendChild(i); return {wrap:w, input:i};
+  }
+  function openMessages(){
+    const box = document.createElement('div');
+    const sys = field('SYSTEM', 'You are the SSB Beast.', 'm-sys');
+    const mdl = field('MODEL', 'kimi-for-coding', 'm-model');
+    const ta = document.createElement('textarea'); ta.id='m-text'; ta.rows=3; ta.placeholder='message clauses (user)… Ctrl+Enter to send';
+    ta.style.cssText='width:100%;background:#05080c;border:1px solid #1d3a45;color:#d5f7ff;padding:6px;font-size:11px;font-family:inherit;';
+    const convo = document.createElement('div'); convo.id='m-convo';
+    convo.style.cssText='max-height:300px;overflow-y:auto;border:1px solid #123;padding:6px;margin:8px 0;font-size:11px;';
+    const sendBtn = document.createElement('button'); sendBtn.className='btn'; sendBtn.textContent='SEND /v1/messages';
+    const ocM = document.createElement('button'); ocM.className='btn'; ocM.textContent='OPENCLAW METHODS';
+    const heM = document.createElement('button'); heM.className='btn'; heM.textContent='HERMES METHODS';
+    const ocC = document.createElement('button'); ocC.className='btn'; ocC.textContent='OPENCLAW CALL';
+    const heC = document.createElement('button'); heC.className='btn'; heC.textContent='HERMES CALL';
+    const btnRow = document.createElement('div'); btnRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;';
+    [sendBtn,ocM,heM,ocC,heC].forEach(b=>btnRow.appendChild(b));
+    function addMsg(role, text, meta){
+      const d = document.createElement('div');
+      d.style.cssText='margin:6px 0;padding:5px;border-left:2px solid '+(role==='user'?'#42f8ff':'#ff2bd6')+';';
+      d.innerHTML = '<div style="color:#7a8694;font-size:9px;">'+role.toUpperCase()+(meta?' · '+meta:'')+'</div>'+
+                    '<div style="white-space:pre-wrap;color:#d5f7ff;">'+String(text).replace(/</g,'&lt;')+'</div>';
+      convo.appendChild(d); convo.scrollTop = convo.scrollHeight;
+    }
+    async function send(){
+      const text = ta.value.trim(); if(!text) return;
+      addMsg('user', text); ta.value='';
+      try{
+        const r = await fetch('/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({model: mdl.input.value, system: sys.input.value,
+            messages:[{role:'user', content:text}], max_tokens:512})});
+        const d = await r.json();
+        const blocks = (d.content||[]).map(b=>b.text||'').join('\n') || JSON.stringify(d);
+        const u = d.usage ? ('in '+d.usage.input_tokens+' / out '+d.usage.output_tokens) : '';
+        addMsg('assistant', blocks, (d['x-ssb-provider']||'')+' · '+(d.model||'')+' '+u);
+      }catch(e){ addMsg('assistant', 'send failed: '+e.message); }
+    }
+    sendBtn.addEventListener('click', send);
+    ta.addEventListener('keydown', e=>{ if(e.ctrlKey && e.key==='Enter') send(); });
+    async function methods(side){
+      try{ const r = await fetch('/beast/api/'+side+'/methods'); const d = await r.json();
+        addMsg('assistant', JSON.stringify(d,null,1).slice(0,3000), side+' methods');
+      }catch(e){ addMsg('assistant', side+' methods failed: '+e.message); }
+    }
+    async function call(side){
+      const text = ta.value.trim() || 'ping';
+      try{ const r = await fetch('/beast/api/'+side+'/call', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({prompt:text})});
+        const d = await r.json();
+        addMsg('assistant', 'request_id: '+(d.request_id||'—')+'\nmode: '+(d.mode||'—')+'\n'+(d.text||d.error||''), side+' call');
+      }catch(e){ addMsg('assistant', side+' call failed: '+e.message); }
+    }
+    ocM.addEventListener('click', ()=>methods('openclaw'));
+    heM.addEventListener('click', ()=>methods('hermes'));
+    ocC.addEventListener('click', ()=>call('openclaw'));
+    heC.addEventListener('click', ()=>call('hermes'));
+    box.appendChild(sys.wrap); box.appendChild(mdl.wrap); box.appendChild(ta);
+    box.appendChild(btnRow); box.appendChild(convo);
+    showModal('MESSAGES — Kimi Code / Anthropic-style /v1/messages + OpenClaw/Hermes bridge', box);
+  }
+  document.getElementById('b-msg').addEventListener('click', openMessages);
+})();
+</script>
+</body>
+</html>
