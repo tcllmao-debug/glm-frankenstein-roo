@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SSB — A2A: talk to the agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#020407; --fg:#d5f7ff; --acc:#42f8ff; --warn:#ffd447; --ok:#59ffa3; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  header { padding:12px 16px; border-bottom:1px solid #123; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:15px; margin:0; color:var(--acc); letter-spacing:1px; }
+  main { display:grid; grid-template-columns: 1fr 1fr; gap:12px; padding:12px 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  section { border:1px solid #123; border-radius:8px; background:#04070c; padding:12px; }
+  h2 { font-size:12px; color:var(--warn); margin:0 0 8px; letter-spacing:1px; }
+  #chat { height:44vh; overflow-y:auto; background:#000; border:1px solid #123; border-radius:6px; padding:10px; font-size:13px; }
+  .m { margin:0 0 8px; padding:7px 9px; border-radius:7px; white-space:pre-wrap; word-break:break-word; }
+  .you { background:#0a1a22; border-left:3px solid var(--acc); }
+  .agent { background:#0a1410; border-left:3px solid var(--ok); }
+  input, textarea { background:#000; color:var(--fg); border:1px solid #234; border-radius:6px; padding:9px; font:inherit; width:100%; }
+  button { background:#0a1a22; color:var(--acc); border:1px solid var(--acc); border-radius:6px; padding:8px 12px; font:inherit; cursor:pointer; }
+  pre { background:#000; border:1px solid #123; border-radius:6px; padding:8px; font-size:11px; overflow:auto; max-height:26vh; }
+  a { color:var(--acc); } .row { display:flex; gap:8px; margin-top:8px; }
+  .muted { color:#6c8a96; font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>A2A — THE AGENT EXISTS IN THE WORLD</h1>
+  <span class="muted">real protocol: <a href="/.well-known/agent.json">agent.json</a> · POST /a2a/message · peers · outbound send</span>
+  <a href="/" style="font-size:12px">← hub</a>
+</header>
+<main>
+  <section>
+    <h2>TALK TO SSB-HERMES</h2>
+    <div id="chat"><div class="m agent">SSB-HERMES online. A2A endpoint live. This is a real communication channel — other agents can register me as a peer and POST to /a2a/message from anywhere.</div></div>
+    <div class="row"><input id="msg" placeholder="say anything — Enter to send" autocomplete="off"><button id="send">send</button></div>
+  </section>
+  <section>
+    <h2>PEER REGISTRY — not unbridgeable</h2>
+    <div class="row"><input id="peerurl" placeholder="https://other-agent.example"><button id="addpeer">register peer</button></div>
+    <div class="row"><input id="peermsg" placeholder="message for the peer"><button id="sendpeer">send to peer</button></div>
+    <pre id="peers">loading…</pre>
+  </section>
+  <section>
+    <h2>AGENT CARD — what the world sees</h2>
+    <pre id="card">loading…</pre>
+  </section>
+  <section>
+    <h2>HOW TO BRIDGE (any agent, anywhere)</h2>
+    <pre>POST /.well-known/agent.json        → discover capabilities
+POST /a2a/message {"message":{"role":"user","parts":[{"type":"text","text":"hi"}]}}
+POST /a2a/peers {"url":"https://you"} → register yourself
+POST /a2a/send {"url":"https://peer","text":"hello from SSB-HERMES"}</pre>
+  </section>
+</main>
+<script src="/kit.js"></script>
+<script>
+"use strict";
+const chat = document.getElementById('chat');
+function add(cls, txt) { const d = document.createElement('div'); d.className = 'm ' + cls; d.textContent = txt; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; }
+async function send() {
+  const inp = document.getElementById('msg'); const v = inp.value.trim(); if (!v) return;
+  inp.value = ''; add('you', 'you: ' + v);
+  const r = await fetch('/a2a/message', {method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({message:{role:'user', parts:[{type:'text', text:v}]}})});
+  const d = await r.json();
+  const txt = (d.artifacts||[]).map(a=>a.text).join('\n') || JSON.stringify(d);
+  add('agent', 'SSB-HERMES (' + (d.provider||'?') + ', ' + (d.ms||'?') + 'ms): ' + txt);
+}
+document.getElementById('send').onclick = send;
+document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+async function peers() {
+  const d = await (await fetch('/a2a/peers')).json();
+  document.getElementById('peers').textContent = JSON.stringify(d, null, 2);
+}
+document.getElementById('addpeer').onclick = async () => {
+  const url = document.getElementById('peerurl').value.trim(); if (!url) return;
+  await fetch('/a2a/peers', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({url})});
+  peers();
+};
+document.getElementById('sendpeer').onclick = async () => {
+  const url = document.getElementById('peerurl').value.trim(), text = document.getElementById('peermsg').value;
+  const d = await (await fetch('/a2a/send?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text))).json();
+  add('agent', '→ peer ' + url + ': ' + JSON.stringify(d).slice(0, 400));
+};
+fetch('/.well-known/agent.json').then(r=>r.json()).then(d => document.getElementById('card').textContent = JSON.stringify(d, null, 2));
+peers();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+bin/
+*.vsix
+.turbo/
+.env
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+.pnpm-store/
+coverage/
+src/assets/ssb/logs/
+src/assets/ssb/pids/
+src/assets/ssb/scanner_data/
+src/assets/ssb/__pycache__/

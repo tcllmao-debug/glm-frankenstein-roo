@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SSB — HERMES Voice + Live Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#020407; --fg:#d5f7ff; --acc:#42f8ff; --warn:#ffd447; --ok:#59ffa3; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  header { padding:14px 18px; border-bottom:1px solid #123; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:16px; margin:0; color:var(--acc); letter-spacing:1px; }
+  .chip { font-size:11px; padding:3px 9px; border:1px solid #234; border-radius:10px; }
+  .chip.on { color:var(--ok); border-color:var(--ok); }
+  .chip.warn { color:var(--warn); border-color:var(--warn); }
+  main { display:flex; gap:14px; padding:14px 18px; flex-wrap:wrap; }
+  #log { flex:1 1 480px; height:56vh; overflow-y:auto; border:1px solid #123; border-radius:8px; padding:12px; background:#04070c; }
+  .msg { margin:0 0 10px; padding:8px 10px; border-radius:8px; white-space:pre-wrap; word-break:break-word; font-size:13px; line-height:1.45; }
+  .you { background:#0a1a22; border-left:3px solid var(--acc); }
+  .hermes { background:#0a1410; border-left:3px solid var(--ok); }
+  .sys { color:#6c8a96; font-size:11px; }
+  #controls { flex:1 1 300px; display:flex; flex-direction:column; gap:10px; }
+  button { background:#0a1a22; color:var(--acc); border:1px solid var(--acc); border-radius:8px; padding:10px 14px; font:inherit; cursor:pointer; }
+  button:hover { background:#0e2632; }
+  button:disabled { opacity:.4; cursor:default; }
+  #micBtn.live { color:var(--ok); border-color:var(--ok); }
+  #row { display:flex; gap:8px; }
+  #text { flex:1; background:#04070c; color:var(--fg); border:1px solid #234; border-radius:8px; padding:10px; font:inherit; }
+  #interim { color:#6c8a96; font-size:12px; min-height:16px; }
+  a { color:var(--acc); }
+</style>
+</head>
+<body>
+<header>
+  <h1>HERMES VOICE + LIVE CHAT</h1>
+  <span class="chip" id="apiChip">api: …</span>
+  <span class="chip" id="micChip">mic: off</span>
+  <span class="chip" id="ttsChip">tts: idle</span>
+  <span class="chip" id="provChip">provider: –</span>
+  <a href="/" style="font-size:12px">← portal hub</a>
+</header>
+<main>
+  <div id="log"><div class="msg sys">HERMES voice channel. Click “enable mic” (browser asks for microphone), speak, Hermes answers with audio out (TTS). Text chat works without mic.</div></div>
+  <div id="controls">
+    <button id="micBtn">🎙 enable mic (STT)</button>
+    <button id="stopBtn" disabled>■ stop mic</button>
+    <div id="interim"></div>
+    <div id="row">
+      <input id="text" placeholder="type a message — Enter to send" autocomplete="off">
+      <button id="sendBtn">send</button>
+    </div>
+    <button id="voiceToggle">🔊 voice replies: ON</button>
+  </div>
+</main>
+<script src="/kit.js"></script>
+<script>
+"use strict";
+const log = document.getElementById('log');
+const interim = document.getElementById('interim');
+const micBtn = document.getElementById('micBtn'), stopBtn = document.getElementById('stopBtn');
+const micChip = document.getElementById('micChip'), ttsChip = document.getElementById('ttsChip');
+const apiChip = document.getElementById('apiChip'), provChip = document.getElementById('provChip');
+let voiceOn = true, recog = null, stream = null;
+
+function add(cls, txt) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls; d.textContent = txt;
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+}
+function speak(txt) {
+  if (!voiceOn || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt.slice(0, 900));
+  u.rate = 1.02; u.pitch = 0.9;
+  u.onstart = () => { ttsChip.textContent = 'tts: speaking'; ttsChip.className = 'chip on'; };
+  u.onend = () => { ttsChip.textContent = 'tts: idle'; ttsChip.className = 'chip'; };
+  speechSynthesis.speak(u);
+}
+const history = [];
+async function ask(text) {
+  add('you', 'you: ' + text);
+  apiChip.textContent = 'api: thinking…'; apiChip.className = 'chip warn';
+  try {
+    const r = await fetch('/portal/api/voice/chat', {
+      method: 'POST', headers: {'content-type': 'application/json'},
+      body: JSON.stringify({text: text, history: history})
+    });
+    const d = await r.json();
+    const answer = d.text || d.error || '(no text)';
+    add('hermes', 'hermes: ' + answer);
+    provChip.textContent = 'provider: ' + (d.provider || '?');
+    apiChip.textContent = 'api: ok'; apiChip.className = 'chip on';
+    history.push({role: 'user', content: text}, {role: 'assistant', content: answer});
+    if (history.length > 12) history.splice(0, history.length - 12);
+    speak(answer);
+  } catch (e) {
+    add('sys', 'api error: ' + e);
+    apiChip.textContent = 'api: error'; apiChip.className = 'chip warn';
+  }
+}
+async function send() {
+  const t = document.getElementById('text');
+  const v = t.value.trim(); if (!v) return;
+  t.value = ''; await ask(v);
+}
+document.getElementById('sendBtn').onclick = send;
+document.getElementById('text').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+document.getElementById('voiceToggle').onclick = function () {
+  voiceOn = !voiceOn;
+  this.textContent = voiceOn ? '🔊 voice replies: ON' : '🔇 voice replies: OFF';
+  if (!voiceOn && 'speechSynthesis' in window) speechSynthesis.cancel();
+};
+
+micBtn.onclick = async () => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { add('sys', 'no SpeechRecognition API — use text chat (Chrome/Edge support STT).'); return; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({audio: true});
+  } catch (e) { add('sys', 'mic permission denied: ' + e.message); return; }
+  recog = new SR();
+  recog.lang = 'en-US'; recog.interimResults = true; recog.continuous = true;
+  recog.onresult = ev => {
+    let fin = '', inter = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const res = ev.results[i];
+      if (res.isFinal) fin += res[0].transcript; else inter += res[0].transcript;
+    }
+    interim.textContent = inter;
+    if (fin.trim()) { interim.textContent = ''; ask(fin.trim()); }
+  };
+  recog.onerror = ev => { if (ev.error !== 'no-speech') add('sys', 'stt: ' + ev.error); };
+  recog.onend = () => { if (recog) try { recog.start(); } catch (e) {} };
+  recog.start();
+  micChip.textContent = 'mic: live'; micChip.className = 'chip on';
+  micBtn.className = 'live'; micBtn.disabled = true; stopBtn.disabled = false;
+  add('sys', 'mic live — speak now.');
+};
+stopBtn.onclick = () => {
+  if (recog) { const r = recog; recog = null; r.stop(); }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  micChip.textContent = 'mic: off'; micChip.className = 'chip';
+  micBtn.className = ''; micBtn.disabled = false; stopBtn.disabled = true;
+  add('sys', 'mic stopped.');
+};
+
+fetch('/beast/api/health').then(r => r.json()).then(h => {
+  apiChip.textContent = 'api: ok · nodes ' + h.nodes;
+  apiChip.className = 'chip on';
+}).catch(() => { apiChip.textContent = 'api: offline'; apiChip.className = 'chip warn'; });
+</script>
+</body>
+</html>

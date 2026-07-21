@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SSB — OS CONSOLE (full OS use)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#020407; --fg:#d5f7ff; --acc:#42f8ff; --warn:#ffd447; --ok:#59ffa3; --err:#ff6a6a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  header { padding:12px 16px; border-bottom:1px solid #123; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:15px; margin:0; color:var(--acc); letter-spacing:1px; }
+  .chip { font-size:11px; padding:3px 9px; border:1px solid #234; border-radius:10px; }
+  main { display:grid; grid-template-columns: 1.4fr 1fr; gap:12px; padding:12px 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  section { border:1px solid #123; border-radius:8px; background:#04070c; padding:10px; }
+  h2 { font-size:12px; color:var(--warn); margin:0 0 8px; letter-spacing:1px; }
+  #term { height:52vh; overflow-y:auto; background:#000; border:1px solid #123; border-radius:6px; padding:10px; font-size:12px; white-space:pre-wrap; word-break:break-all; }
+  .prompt { color:var(--ok); } .err { color:var(--err); }
+  #row { display:flex; gap:8px; margin-top:8px; }
+  input, textarea { background:#000; color:var(--fg); border:1px solid #234; border-radius:6px; padding:9px; font:inherit; width:100%; }
+  button { background:#0a1a22; color:var(--acc); border:1px solid var(--acc); border-radius:6px; padding:8px 12px; font:inherit; cursor:pointer; white-space:nowrap; }
+  button:hover { background:#0e2632; }
+  #fileview { height:30vh; overflow:auto; background:#000; border:1px solid #123; border-radius:6px; padding:8px; font-size:11px; white-space:pre; }
+  table { border-collapse:collapse; width:100%; font-size:11px; }
+  td, th { border-bottom:1px solid #123; padding:3px 6px; text-align:left; }
+  a { color:var(--acc); } .muted { color:#6c8a96; font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>OS CONSOLE — FULL SCOPE TERMINAL</h1>
+  <span class="chip" id="stat">…</span>
+  <span class="chip muted">full OS use · drag panels (bottom-right toggle) · ctrl+wheel = fast scroll</span>
+  <a href="/" style="font-size:12px">← hub</a> <a href="/term" style="font-size:12px">term host →</a> <a href="/cheat" style="font-size:12px">cheat engine →</a>
+</header>
+<main>
+  <section>
+    <h2>TERMINAL — run anything a real terminal can</h2>
+    <div id="term"><span class="muted">any command works: `ls -la /`, `ps aux`, `python3 -c "..."`, pipes, redirects. long-running? use <a href="/term">TERM HOST</a>.</span>
+</div>
+    <div id="row"><span class="prompt" style="padding:9px 0">$</span><input id="cmd" autocomplete="off" spellcheck="false"><button id="runBtn">run</button></div>
+  </section>
+  <section>
+    <h2>FILE READ — any path</h2>
+    <div id="row"><input id="fpath" value="/home/kimi/ssb"><button id="readBtn">read</button></div>
+    <div id="fileview" style="margin-top:8px"></div>
+    <h2 style="margin-top:12px">WRITE — any path</h2>
+    <div id="row"><input id="wpath" value="/tmp/hermes_note.txt"><button id="writeBtn">write</button></div>
+    <textarea id="wcontent" rows="3" style="margin-top:6px">written by the OS layer</textarea>
+  </section>
+  <section>
+    <h2>PROCESS TABLE — raw</h2>
+    <div id="ps" style="max-height:38vh; overflow:auto"></div>
+  </section>
+  <section>
+    <h2>ALL TOOLS — every executable on the box</h2>
+    <div id="tools" style="max-height:38vh; overflow:auto; font-size:11px"></div>
+  </section>
+</main>
+<script src="/kit.js"></script>
+<script>
+"use strict";
+const term = document.getElementById('term');
+async function api(path, opts) { return (await fetch(path, opts)).json(); }
+function tprint(html) { term.innerHTML += html + "\n"; term.scrollTop = term.scrollHeight; }
+async function run() {
+  const inp = document.getElementById('cmd');
+  const cmd = inp.value.trim(); if (!cmd) return;
+  inp.value = '';
+  tprint('<span class="prompt">$ ' + cmd.replace(/</g,'&lt;') + '</span>');
+  const d = await api('/beast/api/os/exec?cmd=' + encodeURIComponent(cmd) + '&timeout=60&cwd=/');
+  if (d.ok) {
+    if (d.stdout) tprint(d.stdout.replace(/</g,'&lt;'));
+    if (d.stderr) tprint('<span class="err">' + d.stderr.replace(/</g,'&lt;') + '</span>');
+    tprint('<span class="muted">rc=' + d.rc + ' · ' + d.ms + 'ms</span>\n');
+  } else {
+    tprint('<span class="err">ERR: ' + (d.error||'') + '</span>' + (d.stdout?('\n'+d.stdout.replace(/</g,'&lt;')):'') + '\n');
+  }
+}
+document.getElementById('runBtn').onclick = run;
+document.getElementById('cmd').addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+document.getElementById('readBtn').onclick = async () => {
+  const p = document.getElementById('fpath').value;
+  const d = await api('/beast/api/os/read?path=' + encodeURIComponent(p));
+  const fv = document.getElementById('fileview');
+  if (d.dir) fv.textContent = d.entries.map(e => (e.dir?'d':'-') + ' ' + String(e.size??'').padStart(10) + '  ' + e.name).join('\n');
+  else fv.textContent = d.text || d.error || ('(binary ' + d.size + ' bytes)');
+};
+document.getElementById('writeBtn').onclick = async () => {
+  const d = await api('/beast/api/os/write?path=' + encodeURIComponent(document.getElementById('wpath').value) + '&content=' + encodeURIComponent(document.getElementById('wcontent').value));
+  tprint('<span class="muted">write: ' + JSON.stringify(d) + '</span>');
+};
+api('/beast/api/os/ps').then(d => {
+  document.getElementById('ps').innerHTML = '<table><tr><th>pid</th><th>rss</th><th>name</th><th>cmdline</th></tr>' +
+    d.processes.map(p => `<tr><td>${p.pid}</td><td>${p.rss_mb}MB</td><td>${p.name}</td><td style="word-break:break-all">${(p.cmdline||'').slice(0,90).replace(/</g,'&lt;')}</td></tr>`).join('') + '</table>';
+  document.getElementById('stat').textContent = 'procs: ' + d.count;
+});
+api('/beast/api/os/tools').then(d => {
+  document.getElementById('tools').innerHTML = '<b>os binaries (' + d.os_binaries_count + '):</b> ' + d.os_binaries.join(' ');
+});
+</script>
+</body>
+</html>

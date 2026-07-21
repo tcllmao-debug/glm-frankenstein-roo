@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SSB — TERM HOST (real terminal, hosted processes)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#020407; --fg:#d5f7ff; --acc:#42f8ff; --warn:#ffd447; --ok:#59ffa3; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  header { padding:12px 16px; border-bottom:1px solid #123; display:flex; gap:12px; align-items:center; }
+  h1 { font-size:15px; margin:0; color:var(--acc); letter-spacing:1px; }
+  main { display:grid; grid-template-columns: 1fr 1fr; gap:12px; padding:12px 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  section { border:1px solid #123; border-radius:8px; background:#04070c; padding:12px; }
+  h2 { font-size:12px; color:var(--warn); margin:0 0 8px; letter-spacing:1px; }
+  #out { height:52vh; overflow-y:auto; background:#000; border:1px solid #123; border-radius:6px; padding:10px; font-size:12px; white-space:pre-wrap; word-break:break-all; }
+  input, textarea, select { background:#000; color:var(--fg); border:1px solid #234; border-radius:6px; padding:9px; font:inherit; width:100%; }
+  button { background:#0a1a22; color:var(--acc); border:1px solid var(--acc); border-radius:6px; padding:8px 12px; font:inherit; cursor:pointer; }
+  .row { display:flex; gap:8px; margin-top:8px; }
+  .sid { color:var(--ok); }
+  a { color:var(--acc); } .muted { color:#6c8a96; font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>TERM HOST — a real terminal</h1>
+  <span class="muted">host long-running processes · watch output live · kill · or FORM an executable when none exists</span>
+  <a href="/" style="font-size:12px">← hub</a>
+</header>
+<main>
+  <section>
+    <h2>HOST A PROCESS (keeps running, watch it)</h2>
+    <div class="row"><input id="cmd" value="watch -n 2 'date; uptime'"><button id="start">start</button></div>
+    <div class="row"><input id="sid" placeholder="session id to view/kill"><button id="view">view</button><button id="kill">kill</button><button id="list">list</button></div>
+    <div id="out"></div>
+  </section>
+  <section>
+    <h2>FORM AN EXECUTABLE (no binary? build one)</h2>
+    <div class="row">
+      <select id="lang" style="max-width:110px"><option>sh</option><option>bash</option><option>python3</option><option>node</option></select>
+      <input id="name" value="mytool" placeholder="name">
+    </div>
+    <textarea id="content" rows="8" style="margin-top:8px">echo "formed executable running"; uname -a</textarea>
+    <div class="row"><button id="form">form + run</button></div>
+    <div id="formout" style="margin-top:8px; font-size:12px; white-space:pre-wrap"></div>
+  </section>
+</main>
+<script src="/kit.js"></script>
+<script>
+"use strict";
+const out = document.getElementById('out');
+let pollTimer = null;
+async function j(u, o) { return (await fetch(u, o)).json(); }
+document.getElementById('start').onclick = async () => {
+  const d = await j('/beast/api/os/term/start?cmd=' + encodeURIComponent(document.getElementById('cmd').value) + '&cwd=/');
+  out.innerHTML += `<div>started <span class="sid">${d.session}</span> pid=${d.pid}</div>`;
+  document.getElementById('sid').value = d.session || '';
+  watch();
+};
+document.getElementById('view').onclick = watch;
+document.getElementById('list').onclick = async () => {
+  const d = await j('/beast/api/os/term/list');
+  out.innerHTML += '<div>' + d.sessions.map(s => `<span class="sid">${s.session}</span> pid=${s.pid} ${s.running?'RUNNING':'done'} — ${s.cmd}`).join('\n') + '</div>';
+};
+document.getElementById('kill').onclick = async () => {
+  const d = await j('/beast/api/os/term/kill?session=' + encodeURIComponent(document.getElementById('sid').value));
+  out.innerHTML += `<div>kill: ${JSON.stringify(d)}</div>`;
+};
+function watch() {
+  clearInterval(pollTimer);
+  const sid = document.getElementById('sid').value.trim(); if (!sid) return;
+  const render = async () => {
+    const d = await j('/beast/api/os/term/output?session=' + encodeURIComponent(sid));
+    if (d.ok) { out.innerHTML = `<div class="muted">${sid} · ${d.running?'RUNNING':'exited rc='+d.rc}</div>` + d.output.replace(/</g,'&lt;'); out.scrollTop = out.scrollHeight; }
+  };
+  render(); pollTimer = setInterval(render, 2000);
+}
+document.getElementById('form').onclick = async () => {
+  const d = await j('/beast/api/os/form', {method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({name: document.getElementById('name').value, lang: document.getElementById('lang').value,
+      content: document.getElementById('content').value})});
+  document.getElementById('formout').textContent = JSON.stringify(d, null, 2);
+};
+</script>
+</body>
+</html>
