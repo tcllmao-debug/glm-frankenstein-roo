@@ -1,0 +1,27 @@
+{
+  "quarantine_id": "4e0405cff935ccba",
+  "original_filename": "cache_runner.py",
+  "original_path": "/home/z/my-project/uploads/955785c7d41442d18cffd5c84b5378dd_cache_runner.py",
+  "uploader_source_id": "127.0.0.1:desperate-b-session",
+  "upload_timestamp_ms": 1783926487639.2808,
+  "quarantine_timestamp_ms": 1783926487642.0188,
+  "file_sha256": "4e0405cff935ccba19350a168f50cf9921d15881c9bc15d476674141898fbb18",
+  "file_size_bytes": 1650,
+  "file_type": "python",
+  "file_entropy": 5.181856629401484,
+  "max_severity": "critical",
+  "decision_action": "quarantine",
+  "decision_severity_score": 0.567,
+  "decision_winning_action_gap": 0.08300000000000007,
+  "decision_tokens_consumed": 0,
+  "top_chain": "vault",
+  "triggered_chains": [
+    "vault",
+    "flame"
+  ],
+  "quarantine_operator_pid": 1281,
+  "bytes_destroyed": false,
+  "evidence_path": "/home/z/my-project/quarantine/4e0405cff935ccba/evidence.bin",
+  "scan_report_path": "/home/z/my-project/quarantine/4e0405cff935ccba/scan_report.json",
+  "decision_path": "/home/z/my-project/quarantine/4e0405cff935ccba/decision.json"
+}

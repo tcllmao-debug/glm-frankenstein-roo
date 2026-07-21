@@ -25,6 +25,13 @@ import {
         ssbStopCommand,
         ssbStatusCommand,
 } from "../frankenstein/commands"
+import {
+        beastClawParallelCommand,
+        mergeBeastClawCommand,
+        selfImproveCommand,
+        reviewLastWriteCommand,
+        tripleReviewLastWriteCommand,
+} from "../frankenstein/beastClaw"
 
 /**
  * Helper to get the visible ClineProvider instance or log if not found.
@@ -193,6 +200,13 @@ const getCommandsMap = ({ context, outputChannel, provider }: RegisterCommandOpt
         ssbStart: () => ssbStartCommand(),
         ssbStop: () => ssbStopCommand(),
         ssbStatus: () => ssbStatusCommand(),
+
+        // GLM Frankenstein — parallel Beast Claw + self-improvement
+        beastClawParallel: () => beastClawParallelCommand(),
+        mergeBeastClaw: () => mergeBeastClawCommand(),
+        selfImprove: () => selfImproveCommand(),
+        reviewLastWrite: () => reviewLastWriteCommand(),
+        tripleReviewLastWrite: () => tripleReviewLastWriteCommand(),
 })
 
 export const openClineInNewTab = async ({ context, outputChannel }: Omit<RegisterCommandOptions, "provider">) => {

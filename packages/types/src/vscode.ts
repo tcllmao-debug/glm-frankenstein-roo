@@ -56,6 +56,11 @@ export const commandIds = [
         "ssbStart",
         "ssbStop",
         "ssbStatus",
+        "beastClawParallel",
+        "mergeBeastClaw",
+        "selfImprove",
+        "reviewLastWrite",
+        "tripleReviewLastWrite",
 ] as const
 
 export type CommandId = (typeof commandIds)[number]

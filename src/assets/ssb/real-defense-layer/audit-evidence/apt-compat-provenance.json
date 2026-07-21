@@ -1,0 +1,28 @@
+{
+  "quarantine_id": "44aab6e7f2c3fab9",
+  "original_filename": "compat.py",
+  "original_path": "/home/z/my-project/uploads/a215752200554d0daaf40a58a57676a3_compat.py",
+  "uploader_source_id": "127.0.0.1:apt-a-session",
+  "upload_timestamp_ms": 1783926487623.5732,
+  "quarantine_timestamp_ms": 1783926487626.5117,
+  "file_sha256": "44aab6e7f2c3fab9a32ea0bd655d244715f2390734fd1dbf9cdfe5f1873b1ac6",
+  "file_size_bytes": 1754,
+  "file_type": "python",
+  "file_entropy": 4.755450477133785,
+  "max_severity": "critical",
+  "decision_action": "quarantine_escalate",
+  "decision_severity_score": 0.723,
+  "decision_winning_action_gap": 0.07299999999999995,
+  "decision_tokens_consumed": 0,
+  "top_chain": "vault",
+  "triggered_chains": [
+    "vault",
+    "flame",
+    "mirror"
+  ],
+  "quarantine_operator_pid": 1281,
+  "bytes_destroyed": false,
+  "evidence_path": "/home/z/my-project/quarantine/44aab6e7f2c3fab9/evidence.bin",
+  "scan_report_path": "/home/z/my-project/quarantine/44aab6e7f2c3fab9/scan_report.json",
+  "decision_path": "/home/z/my-project/quarantine/44aab6e7f2c3fab9/decision.json"
+}
