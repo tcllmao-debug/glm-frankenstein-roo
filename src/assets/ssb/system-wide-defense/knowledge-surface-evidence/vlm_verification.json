@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "1) Yes, the button labeled 'PAUSE SELF-HEAL FOR UPDATES' is visible.  \n2) Yes, there is a section titled 'Self-Heal Toggle' (displayed as \"[ ] SELF-HEAL TOGGLE\" in the dashboard).  \n3) The button has an orange border and orange text, with the text \"PAUSE SELF-HEAL FOR UPDATES\" centered inside it. The button appears to be a rectangular element with a dark background (matching the dashboard's dark theme) and the orange border/text making it stand out.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1783942931,
+  "id": "202607131942035602e0c9b7f64e0c",
+  "model": "glm-4.6v",
+  "object": "chat.completion",
+  "request_id": "202607131942035602e0c9b7f64e0c",
+  "usage": {
+    "completion_tokens": 119,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1827,
+    "prompt_tokens_details": {
+      "cached_tokens": 4
+    },
+    "total_tokens": 1946
+  }
+}

